@@ -17,8 +17,8 @@ class CreateEventsTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('type');
-            $table->int('visible');
-            $table->int('applyable');
+            $table->integer('visible');
+            $table->integer('applyable');
             $table->string('code');
             $table->date('start_date');
             $table->date('end_date');

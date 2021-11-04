@@ -16,11 +16,9 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->bigInteger('store_id');
+            $table->foreignId('store_id')->constrained('stores');
             $table->decimal('price', 10, 2);
-            $table->bigInteger('season_id');
-            $table->foreign('store_id')->references('id')->on('stores');
-            $table->foreign('season_id')->references('id')->on('seasons');
+            $table->foreignId('season_id')->constrained('seasons');
             $table->timestamps();
         });
     }

@@ -15,12 +15,10 @@ class CreateChatParticipantsTable extends Migration
     {
         Schema::create('chat_participants', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('user_id');
-            $table->bigInteger('store_id');
-            $table->bigInteger('chatroom_id');
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('store_id')->references('id')->on('stores');
-            $table->foreign('chatroom_id')->references('id')->on('chatrooms');
+            
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('store_id')->constrained('stores');
+            $table->foreignId('chatroom_id')->constrained('chatrooms');
             $table->timestamps();
         });
     }

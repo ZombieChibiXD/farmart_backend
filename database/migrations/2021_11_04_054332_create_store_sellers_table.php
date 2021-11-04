@@ -15,10 +15,8 @@ class CreateStoreSellersTable extends Migration
     {
         Schema::create('store_sellers', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('user_id');
-            $table->bigInteger('store_id');
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('store_id')->references('id')->on('stores');
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('store_id')->constrained('stores');
             $table->timestamps();
         });
     }
