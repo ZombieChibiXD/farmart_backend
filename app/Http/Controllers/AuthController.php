@@ -33,6 +33,32 @@ class AuthController extends Controller
         return response($response, 201);
     }
 
+    public function login(Request $request){
+        $fields = $request->validate([
+            'user' => 'required|string',
+            'password' => 'required|string',
+        ]);
+        $field = filter_var($fields['user'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $user = User::where($field, $fields['user'])->first();
+        if(!$user){
+            return response([
+                'message' => 'Username/Email is not found!'
+            ], 401);
+        }
+        else if (!Hash::check($fields['password'], $user->password)){
+            return response([
+                'message' => 'Bad password'
+            ], 401);
+        }
+        $token = $user->createToken('myapptoken')->plainTextToken;
+        $response = [
+            'user' => $user,
+            'token' => $token
+        ];
+        return response($response, 201);
+    }
+
     public function logout(Request $request){
         $user = request()->user();
         $user->currentAccessToken()->delete();
