@@ -20,6 +20,12 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+
+
+// List all products
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/product/{id}', [ProductController::class, 'show']);
+
 // Get store by ID and gets the general data about the store
 Route::get('/store/{id}', [StoreController::class, 'show']);
 
@@ -31,9 +37,11 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/stores', [StoreController::class, 'index']);
     // Creates a new store for user
     Route::post('/stores', [StoreController::class, 'store']);
+
     // Create a new product
     Route::post('/products', [ProductController::class, 'store']);
     Route::delete('/product/{id}', [ProductController::class, 'destroy']);
+    Route::put('/product/{id}', [ProductController::class, 'update']);
 
 
     Route::get('/check_is_logged_in', function(){

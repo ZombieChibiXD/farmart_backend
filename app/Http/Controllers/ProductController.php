@@ -14,7 +14,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        return response(Product::all());
     }
 
     /**
@@ -56,7 +56,13 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        $product = Product::find($id);
+        if(!$product){
+            return response([
+                'message' => 'Product does not exist!'
+            ], 401);
+        }
+        return response($product);
     }
 
     /**
@@ -68,7 +74,39 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $product = Product::find($id);
+        if(!$product){
+            return response([
+                'message' => 'Product does not exist!'
+            ], 401);
+        }
+
+        $user = request()->user();
+
+        $fields = $request->validate([
+            'name' => 'required|string',
+            'slug' => 'required|string|unique:products,slug,' . $product->id,
+            'price' => 'required|numeric'
+        ]);
+        $exist = $user->stores->contains($product->store->id);
+        if(!$exist){
+            return response([
+                'message' => 'You have insufficient permission to modify the product!'
+            ], 401);
+        }
+
+        $product->name = $fields['name'];
+        $product->slug = $fields['slug'];
+        $product->price = $fields['price'];
+        if($product->update()){
+            return response($product, 202);
+        }
+
+        return response([
+            'message' => 'Unknown error on updating product'
+        ], 401);
+
+
     }
 
     /**
@@ -94,6 +132,7 @@ class ProductController extends Controller
         }
         if(Product::destroy($id)>0){
             return response([
+                'product' => $product,
                 'message' => 'Product have been removed!'
             ], 201);
         }
