@@ -59,7 +59,13 @@ class StoreController extends Controller
      */
     public function show($id)
     {
-        //
+        $store = Store::findFirstOrFail($id);
+
+        $response = [
+            'store' => $store,
+            'products' => $store->products
+        ];
+        return response($response, 201);
     }
 
     /**
