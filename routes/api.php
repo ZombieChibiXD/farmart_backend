@@ -33,7 +33,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/stores', [StoreController::class, 'store']);
     // Create a new product
     Route::post('/products', [ProductController::class, 'store']);
-    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    Route::delete('/product/{id}', [ProductController::class, 'destroy']);
 
 
     Route::get('/check_is_logged_in', function(){
