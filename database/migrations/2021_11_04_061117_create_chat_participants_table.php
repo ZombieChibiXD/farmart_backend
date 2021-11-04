@@ -15,7 +15,7 @@ class CreateChatParticipantsTable extends Migration
     {
         Schema::create('chat_participants', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('store_id')->constrained('stores');
             $table->foreignId('chatroom_id')->constrained('chatrooms');
