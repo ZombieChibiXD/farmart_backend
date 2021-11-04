@@ -19,7 +19,7 @@ class CreateProductsTable extends Migration
             $table->string('slug');
             $table->foreignId('store_id')->constrained('stores');
             $table->decimal('price', 10, 2);
-            $table->foreignId('season_id')->constrained('seasons');
+            // $table->foreignId('season_id')->constrained('seasons');
             $table->timestamps();
         });
     }

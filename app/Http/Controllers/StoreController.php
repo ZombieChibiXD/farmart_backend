@@ -59,8 +59,12 @@ class StoreController extends Controller
      */
     public function show($id)
     {
-        $store = Store::findFirstOrFail($id);
-
+        $store = Store::find($id);
+        if(!$store){
+            return response([
+                'message' => 'Store does not exist!'
+            ], 401);
+        }
         $response = [
             'store' => $store,
             'products' => $store->products

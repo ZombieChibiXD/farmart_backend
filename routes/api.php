@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,12 +20,20 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Get store by ID and gets the general data about the store
+Route::get('/store/{id}', [StoreController::class, 'show']);
 
+// Routes that you can access after logging in.
 Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // List stores that user can handle
     Route::get('/stores', [StoreController::class, 'index']);
+    // Creates a new store for user
     Route::post('/stores', [StoreController::class, 'store']);
+    // Create a new product
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 
 
     Route::get('/check_is_logged_in', function(){
