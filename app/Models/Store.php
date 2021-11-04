@@ -31,4 +31,7 @@ class Store extends Model
     public function owner(){
         return $this->hasOne(User::class);
     }
+    public function products(){
+        return $this->hasMany(Products::class);
+    }
 }
