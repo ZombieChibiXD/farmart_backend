@@ -48,4 +48,7 @@ class User extends Authenticatable
     public function stores(){
         return $this->belongsToMany(Store::class, 'store_sellers');
     }
+    public function owned_store(){
+        return $this->hasMany(Store::class);
+    }
 }

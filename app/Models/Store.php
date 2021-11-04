@@ -15,6 +15,8 @@ class Store extends Model
      * @var string[]
      */
     protected $fillable = [
+        'user_id',
+        'name',
         'storename',
         'description',
         'location',
@@ -25,5 +27,8 @@ class Store extends Model
 
     public function handlers(){
         return $this->belongsToMany(User::class, 'store_sellers');
+    }
+    public function owner(){
+        return $this->hasOne(User::class);
     }
 }

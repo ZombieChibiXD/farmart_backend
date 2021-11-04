@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Store;
 use Illuminate\Http\Request;
 
 class StoreController extends Controller
@@ -14,8 +15,10 @@ class StoreController extends Controller
     public function index()
     {
         $user = request()->user();
-        $user_stores = $user->stores();
-        return response($user_stores, 201);
+        $response = [
+            'stores' => $user->stores
+        ];
+        return response($response, 201);
     }
 
     /**
@@ -26,7 +29,26 @@ class StoreController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $user = request()->user();
+        $fields = $request->validate([
+            'name' => 'required|string',
+            'storename' => 'required|string|unique:stores,storename',
+            'description' => 'required|string',
+            'location' => 'required|string',
+            'address' => 'required|string',
+            'coordinate' => 'required|string'
+        ]);
+        $store = Store::create([
+            'user_id' => $user->id,
+            'name' => $fields['name'],
+            'storename' => $fields['storename'],
+            'description' => $fields['description'],
+            'location' => $fields['location'],
+            'address' => $fields['address'],
+            'coordinate' => $fields['coordinate']
+        ]);
+        $store->handlers()->attach($user->id);
+        return response($store, 201);
     }
 
     /**
