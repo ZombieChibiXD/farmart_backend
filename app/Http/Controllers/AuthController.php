@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -24,6 +25,7 @@ class AuthController extends Controller
             'email' => $fields['email'],
             'username' => $fields['username'],
             'password' => bcrypt($fields['password']),
+            'role' => Role::MEMBER,
         ]);
         $token = $user->createToken('myapptoken')->plainTextToken;
         $response = [

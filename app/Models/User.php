@@ -45,10 +45,31 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function stores(){
+    /**
+     * Appended attributes.
+     *
+     * @var array
+     */
+    protected $appends  = ['roles'];
+
+    public function stores()
+    {
         return $this->belongsToMany(Store::class, 'store_sellers');
     }
-    public function owned_store(){
+    public function getRolesAttribute()
+    {
+        if ($this->role == 0)
+            return ['RESTRICTED'];
+        $user_roles = [];
+        $roles = Role::where('flag', '<>', 0)->get();
+        foreach ($roles as $key => $value) {
+            if  (($this->role & $value->flag) == $value->flag)
+                $user_roles[] = [$value->flag =>$value->name];
+        }
+        return $user_roles;
+    }
+    public function owned_store()
+    {
         return $this->hasMany(Store::class);
     }
 }

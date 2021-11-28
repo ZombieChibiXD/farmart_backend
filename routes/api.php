@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,41 +18,47 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register',    [AuthController::class, 'register']);
+Route::post('/login',       [AuthController::class, 'login']);
 
-
-
-// List all products
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/product/{id}', [ProductController::class, 'show']);
-
-// Get store by ID and gets the general data about the store
-Route::get('/store/{id}', [StoreController::class, 'show']);
-
-// Routes that you can access after logging in.
+#region Generic user routes
 Route::group(['middleware' => ['auth:sanctum']], function(){
-    Route::post('/logout', [AuthController::class, 'logout']);
-
-    // List stores that user can handle
-    Route::get('/stores', [StoreController::class, 'index']);
-    // Creates a new store for user
-    Route::post('/stores', [StoreController::class, 'store']);
-
-    // Create a new product
-    Route::post('/products', [ProductController::class, 'store']);
-    Route::delete('/product/{id}', [ProductController::class, 'destroy']);
-    Route::put('/product/{id}', [ProductController::class, 'update']);
-
-
+    Route::get('/logout', [AuthController::class, 'logout']);
     Route::get('/check_is_logged_in', function(){
         return 'You are logged in!';
     });
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::middleware('role:' . Role::RESTRICTED)->get('/check_restricted', function(){
+        return ['message'=>'You are restricted!'];
+    });
 });
+#endregion
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+#region Store
+// Get store by ID and gets the general data about the store
+Route::get('/store/{id}', [StoreController::class, 'show']);
+Route::group(['middleware' => ['auth:sanctum']], function(){
+    // List stores that user can handle
+    Route::get('/managed-stores', [StoreController::class, 'index']);
+    // Creates a new store for user
+    Route::post('/stores', [StoreController::class, 'store']);
+
 });
+#endregion
+
+#region Products
+// List all products
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/product/{id}', [ProductController::class, 'show']);
+Route::group(['middleware' => ['auth:sanctum']], function(){
+    // Create a new product
+    Route::post  ('/store/{store_id}/products',     [ProductController::class, 'store']);
+    Route::delete('/store/{store_id}/product/{id}', [ProductController::class, 'destroy']);
+    Route::put   ('/store/{store_id}/product/{id}', [ProductController::class, 'update']);
+});
+#endregion
 
 Route::get('/hello-world', function (){
     return 'Hello world!';

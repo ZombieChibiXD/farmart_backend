@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +20,7 @@ class UserSeeder extends Seeder
         $user->firstname = 'John';
         $user->lastname = 'Doe';
         $user->email = 'johndoe@gmail.com';
-        $user->role = 4;
+        $user->role = Role::ADMINISTRATOR;
         $user->username = 'johndoe_';
         $user->password = Hash::make('johndoe');
         $user->save();
