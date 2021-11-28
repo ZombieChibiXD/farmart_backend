@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register',    [AuthController::class, 'register']);
 Route::post('/login',       [AuthController::class, 'login']);
 
+
 #region Generic user routes
 Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/logout', [AuthController::class, 'logout']);
@@ -30,8 +31,11 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::middleware('role:' . Role::RESTRICTED)->get('/check_restricted', function(){
+    Route::middleware('role:' . Role::RESTRICTED)->get('/restricted', function(){
         return ['message'=>'You are restricted!'];
+    });
+    Route::middleware('role:' . (Role::MEMBER|Role::SELLER))->get('/member_seller', function(){
+        return ['message'=>'You are seller and member!'];
     });
 });
 #endregion
@@ -41,9 +45,10 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 Route::get('/store/{id}', [StoreController::class, 'show']);
 Route::group(['middleware' => ['auth:sanctum']], function(){
     // List stores that user can handle
-    Route::get('/managed-stores', [StoreController::class, 'index']);
+    Route::get('/stores', [StoreController::class, 'index']);
     // Creates a new store for user
     Route::post('/stores', [StoreController::class, 'store']);
+    Route::put('/store/{id}', [StoreController::class, 'update']);
 
 });
 #endregion

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\KeyValueRequest;
 use App\Models\Role;
 use App\Models\Store;
 use Illuminate\Http\Request;
@@ -63,7 +64,7 @@ class StoreController extends Controller
     public function show($id)
     {
         $store = Store::find($id);
-        if(!$store){
+        if (!$store) {
             return response([
                 'message' => 'Store does not exist!'
             ], 401);
@@ -84,17 +85,22 @@ class StoreController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-    }
+        $user = request()->user();
+        if (!$user->stores->contains($id))
+            return response([
+                'message' =>
+                'Store does not exist, or you have insufficient permission to modify the store!'
+            ], 403);
+        $requirement = [
+            'name' => 'required|string',
+            'storename' => 'required|string|unique:stores,storename',
+            'description' => 'required|string',
+            'location' => 'required|string',
+            'address' => 'required|string',
+            'coordinate' => 'required|string'
+        ];
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        $fields = KeyValueRequest::requirements($request, $requirement);
+        return KeyValueRequest::updateModel(Store::class, $id, $fields);
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\KeyValueRequest;
 use App\Models\Product;
+use App\Models\Store;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -23,26 +25,23 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, int $store_id)
     {
-        $user = request()->user();
+        if(!request()->user()->stores->contains($store_id)){
+            return response([
+                'message' => 'Store does not exist, or you have insufficient permission to modify the store!'
+            ], 403);
+        }
 
         $fields = $request->validate([
             'name' => 'required|string',
             'slug' => 'required|string|unique:products,slug',
-            'store_id' => 'required|numeric',
             'price' => 'required|numeric'
         ]);
-        $exist = $user->stores->contains($fields['store_id']);
-        if(!$exist){
-            return response([
-                'message' => 'Store does not exist, or you have insufficient permission to modify the store!'
-            ], 401);
-        }
         $product = Product::create([
             'name' => $fields['name'],
             'slug' => $fields['slug'],
-            'store_id' => $fields['store_id'],
+            'store_id' => $store_id,
             'price' => $fields['price']
         ]);
         return response($product, 201);
@@ -72,41 +71,27 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $store_id, int $id)
     {
-        $product = Product::find($id);
-        if(!$product){
+        if(!request()->user()->stores->contains($store_id)){
             return response([
-                'message' => 'Product does not exist!'
-            ], 401);
+                'message' => 'Store does not exist, or you have insufficient permission to modify the store!'
+            ], 403);
+        }
+        if(!in_array($id, Store::find($store_id)->products->pluck('id')->all())){
+            return response([
+                'message' => 'Product does not exist, or you have insufficient permission to modify the product!'
+            ], 403);
         }
 
-        $user = request()->user();
-
-        $fields = $request->validate([
+        $requirement = [
             'name' => 'required|string',
-            'slug' => 'required|string|unique:products,slug,' . $product->id,
+            'slug' => 'required|string|unique:products,slug,' . $id,
             'price' => 'required|numeric'
-        ]);
-        $exist = $user->stores->contains($product->store->id);
-        if(!$exist){
-            return response([
-                'message' => 'You have insufficient permission to modify the product!'
-            ], 401);
-        }
+        ];
 
-        $product->name = $fields['name'];
-        $product->slug = $fields['slug'];
-        $product->price = $fields['price'];
-        if($product->update()){
-            return response($product, 202);
-        }
-
-        return response([
-            'message' => 'Unknown error on updating product'
-        ], 401);
-
-
+        $fields = KeyValueRequest::requirements($request, $requirement);
+        return KeyValueRequest::updateModel(Product::class, $id, $fields);
     }
 
     /**
@@ -115,30 +100,27 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($store_id, $id)
     {
-        $user = request()->user();
+        if(!request()->user()->stores->contains($store_id)){
+            return response([
+                'message' => 'Store does not exist, or you have insufficient permission to modify the store!'
+            ], 403);
+        }
+        if(!in_array($id, Store::find($store_id)->products->pluck('id')->all())){
+            return response([
+                'message' => 'Product does not exist, or you have insufficient permission to modify the product!'
+            ], 403);
+        }
         $product = Product::find($id);
-        if(!$product){
-            return response([
-                'message' => 'Product does not exist!'
-            ], 401);
-        }
-        $exist = $user->stores->contains($product->store->id);
-        if(!$exist){
-            return response([
-                'message' => 'You do not have the permission to modify this product!'
-            ], 401);
-        }
         if(Product::destroy($id)>0){
             return response([
                 'product' => $product,
                 'message' => 'Product have been removed!'
-            ], 201);
+            ], 200);
         }
         return response([
             'message' => 'An unknown error has occured!!'
         ], 501);
-
     }
 }
