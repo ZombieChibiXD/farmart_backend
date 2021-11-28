@@ -33,11 +33,14 @@ class StoreController extends Controller
     {
         $fields = $request->validate([
             'name' => 'required|string',
-            'storename' => 'required|string|unique:stores,storename',
+            'storename' => 'required|string|alpha_dash|unique:stores,storename',
             'description' => 'required|string',
             'location' => 'required|string',
             'address' => 'required|string',
-            'coordinate' => 'required|string'
+            'coordinate' => 'required|string',
+            'email' => 'string|email',
+            'url' => 'string|url',
+            'telp' => 'string'
         ]);
         $user = request()->user();
         $user->role |= Role::SELLER;
@@ -49,7 +52,10 @@ class StoreController extends Controller
             'description' => $fields['description'],
             'location' => $fields['location'],
             'address' => $fields['address'],
-            'coordinate' => $fields['coordinate']
+            'coordinate' => $fields['coordinate'],
+            'email' => $fields['email'],
+            'url' => $fields['url'],
+            'telephone' => $fields['telephone'],
         ]);
         $store->handlers()->attach($user->id);
         return response($store, 201);
@@ -87,11 +93,14 @@ class StoreController extends Controller
     {
         $requirement = [
             'name' => 'required|string',
-            'storename' => 'required|string|unique:stores,storename',
+            'storename' => 'required|string|alpha_dash|unique:stores,storename',
             'description' => 'required|string',
             'location' => 'required|string',
             'address' => 'required|string',
-            'coordinate' => 'required|string'
+            'coordinate' => 'required|string',
+            'email' => 'required|string|email',
+            'url' => 'required|string|url',
+            'telp' => 'required|string'
         ];
 
         $fields = KeyValueRequest::requirements($request, $requirement);

@@ -18,10 +18,13 @@ class CreateStoresTable extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->string('name');
             $table->string('storename')->unique();
-            $table->text('description');
-            $table->string('location');
-            $table->string('address');
-            $table->string('coordinate');
+            $table->string('url')->default('');
+            $table->string('email')->default('');
+            $table->string('telephone')->default('');
+            $table->text('description')->default('');
+            $table->string('location')->default('');
+            $table->string('address')->default('');
+            $table->string('coordinate')->default('');
             $table->timestamps();
         });
     }
