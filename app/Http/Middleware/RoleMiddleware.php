@@ -18,11 +18,10 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, int $flag)
     {
         $user = Auth::user();
-
         if ($flag) {
             if ($user->role & $flag == $flag)
                 return $next($request);
-        } else if ($user->role == 0) return redirect('blocked');
-        return redirect('login');
+        } else if ($user->role == 0) return response(['message'=>'You are restricted'],403);
+        return response(['message'=>'Not available'],403);;
     }
 }
