@@ -22,6 +22,6 @@ class RoleMiddleware
             if ($user->role & $flag == $flag)
                 return $next($request);
         } else if ($user->role == 0) return response(['message'=>'You are restricted'],403);
-        return response(['message'=>'Not available'],403);;
+        return response(['message'=>'Not available'],403);
     }
 }

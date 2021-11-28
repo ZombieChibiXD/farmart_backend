@@ -48,7 +48,9 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/stores', [StoreController::class, 'index']);
     // Creates a new store for user
     Route::post('/stores', [StoreController::class, 'store']);
-    Route::put('/store/{id}', [StoreController::class, 'update']);
+
+    Route::middleware('store_manage')
+            ->put('/store/{store_id}', [StoreController::class, 'update']);
 
 });
 #endregion
@@ -57,11 +59,18 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 // List all products
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/product/{id}', [ProductController::class, 'show']);
-Route::group(['middleware' => ['auth:sanctum']], function(){
+Route::group([
+    'prefix' => 'store/{store_id}',
+    'middleware' => ['auth:sanctum', 'store_manage'],
+], function(){
     // Create a new product
-    Route::post  ('/store/{store_id}/products',     [ProductController::class, 'store']);
-    Route::delete('/store/{store_id}/product/{id}', [ProductController::class, 'destroy']);
-    Route::put   ('/store/{store_id}/product/{id}', [ProductController::class, 'update']);
+    Route::post  ('/products', [ProductController::class, 'store']);
+    Route::group([
+        'middleware' => ['store_product_manage']
+    ], function(){
+        Route::delete('/product/{product_id}', [ProductController::class, 'destroy']);
+        Route::put   ('/product/{product_id}', [ProductController::class, 'update']);
+    });
 });
 #endregion
 

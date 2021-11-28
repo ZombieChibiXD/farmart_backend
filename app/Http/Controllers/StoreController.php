@@ -83,14 +83,8 @@ class StoreController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $store_id)
     {
-        $user = request()->user();
-        if (!$user->stores->contains($id))
-            return response([
-                'message' =>
-                'Store does not exist, or you have insufficient permission to modify the store!'
-            ], 403);
         $requirement = [
             'name' => 'required|string',
             'storename' => 'required|string|unique:stores,storename',
@@ -101,6 +95,6 @@ class StoreController extends Controller
         ];
 
         $fields = KeyValueRequest::requirements($request, $requirement);
-        return KeyValueRequest::updateModel(Store::class, $id, $fields);
+        return KeyValueRequest::updateModel(Store::class, $store_id, $fields);
     }
 }
