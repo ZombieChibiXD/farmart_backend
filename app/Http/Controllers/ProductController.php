@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\KeyValueRequest;
 use App\Models\Product;
-use App\Models\Store;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -30,14 +29,12 @@ class ProductController extends Controller
         $fields = $request->validate([
             'name' => 'required|string',
             'slug' => 'required|string|unique:products,slug',
-            'price' => 'required|numeric'
+            'price' => 'required|numeric',
+            'in_stock' => 'numeric',
+            'description' => 'string',
         ]);
-        $product = Product::create([
-            'name' => $fields['name'],
-            'slug' => $fields['slug'],
-            'store_id' => $store_id,
-            'price' => $fields['price']
-        ]);
+        // $data = ['store_id' => $store_id, ...$fields];
+        $product = Product::create(array_merge(['store_id' => $store_id], $fields));
         return response($product, 201);
     }
 
@@ -50,7 +47,7 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::find($id);
-        if(!$product){
+        if (!$product) {
             return response([
                 'message' => 'Product does not exist!'
             ], 401);
@@ -70,7 +67,9 @@ class ProductController extends Controller
         $requirement = [
             'name' => 'required|string',
             'slug' => 'required|string|unique:products,slug,' . $product_id,
-            'price' => 'required|numeric'
+            'price' => 'required|numeric',
+            'in_stock' => 'required|numeric',
+            'description' => 'required|string',
         ];
 
         $fields = KeyValueRequest::requirements($request, $requirement);
@@ -86,7 +85,7 @@ class ProductController extends Controller
     public function destroy($product_id)
     {
         $product = Product::find($product_id);
-        if(Product::destroy($product_id)>0){
+        if (Product::destroy($product_id) > 0) {
             return response([
                 'product' => $product,
                 'message' => 'Product have been removed!'
