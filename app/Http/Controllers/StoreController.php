@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\Store;
 use Illuminate\Http\Request;
 
@@ -29,7 +30,6 @@ class StoreController extends Controller
      */
     public function store(Request $request)
     {
-        $user = request()->user();
         $fields = $request->validate([
             'name' => 'required|string',
             'storename' => 'required|string|unique:stores,storename',
@@ -38,6 +38,9 @@ class StoreController extends Controller
             'address' => 'required|string',
             'coordinate' => 'required|string'
         ]);
+        $user = request()->user();
+        $user->role |= Role::SELLER;
+        $user->save();
         $store = Store::create([
             'user_id' => $user->id,
             'name' => $fields['name'],
