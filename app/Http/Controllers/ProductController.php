@@ -24,8 +24,9 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, int $store_id)
+    public function store(Request $request)
     {
+        $store_id = $request->route('store_id');
         $fields = $request->validate([
             'name' => 'required|string',
             'slug' => 'required|string|unique:products,slug',
@@ -33,6 +34,7 @@ class ProductController extends Controller
             'in_stock' => 'numeric',
             'description' => 'string',
         ]);
+        $fields['description'] = $fields['description'] ?? '';
         // $data = ['store_id' => $store_id, ...$fields];
         $product = Product::create(array_merge(['store_id' => $store_id], $fields));
         return response($product, 201);
@@ -62,8 +64,10 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, int $product_id)
+    public function update(Request $request)
     {
+
+        $product_id = $request->route('product_id');
         $requirement = [
             'name' => 'required|string',
             'slug' => 'required|string|unique:products,slug,' . $product_id,
@@ -82,8 +86,9 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($product_id)
+    public function destroy(Request $request)
     {
+        $product_id = $request->route('product_id');
         $product = Product::find($product_id);
         if (Product::destroy($product_id) > 0) {
             return response([

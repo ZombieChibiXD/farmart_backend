@@ -13,7 +13,7 @@ class Image extends Model
 
     protected $fillable = [
         'location',
-        'active'
+        'local'
     ];
 
     protected $appends  = ['url'];

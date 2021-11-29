@@ -74,10 +74,14 @@ Route::group([
     // Create a new product
     Route::post  ('/products', [ProductController::class, 'store']);
     Route::group([
+        'prefix' => 'product/{product_id}',
         'middleware' => ['store_product_manage']
     ], function(){
-        Route::delete('/product/{product_id}', [ProductController::class, 'destroy']);
-        Route::put   ('/product/{product_id}', [ProductController::class, 'update']);
+        Route::put   ('/', [ProductController::class, 'update']);
+        Route::delete('/', [ProductController::class, 'destroy']);
+
+        Route::post ('/images', [ImageController::class, 'add_product_image']);
+        Route::delete('/image/{image_id}', [ImageController::class, 'remove_product_image']);
     });
 });
 #endregion
