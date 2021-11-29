@@ -27,14 +27,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $store_id = $request->route('store_id');
-        $fields = $request->validate([
-            'name' => 'required|string',
-            'slug' => 'required|string|unique:products,slug',
-            'price' => 'required|numeric',
-            'in_stock' => 'numeric',
-            'description' => 'string',
-        ]);
-        $fields['description'] = $fields['description'] ?? '';
+        $fields = $request->validate(Product::FIELDS);
         // $data = ['store_id' => $store_id, ...$fields];
         $product = Product::create(array_merge(['store_id' => $store_id], $fields));
         return response($product, 201);
@@ -68,15 +61,8 @@ class ProductController extends Controller
     {
 
         $product_id = $request->route('product_id');
-        $requirement = [
-            'name' => 'required|string',
-            'slug' => 'required|string|unique:products,slug,' . $product_id,
-            'price' => 'required|numeric',
-            'in_stock' => 'required|numeric',
-            'description' => 'required|string',
-        ];
 
-        $fields = KeyValueRequest::requirements($request, $requirement);
+        $fields = KeyValueRequest::requirements($request, Product::FIELDS);
         return KeyValueRequest::updateModel(Product::class, $product_id, $fields);
     }
 

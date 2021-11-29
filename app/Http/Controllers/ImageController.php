@@ -7,7 +7,6 @@ use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Http\Request;
 
-use function PHPSTORM_META\type;
 
 class ImageController extends Controller
 {
