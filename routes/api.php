@@ -33,7 +33,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::post('/user/photo', [ImageController::class, 'add_user_profile']);
+    Route::post('/user/photo', [ImageController::class, 'user_profile']);
     Route::middleware('role:' . Role::RESTRICTED)->get('/restricted', function(){
         return ['message'=>'You are restricted!'];
     });
@@ -51,9 +51,14 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/stores', [StoreController::class, 'index']);
     // Creates a new store for user
     Route::post('/stores', [StoreController::class, 'store']);
+    Route::group([
+        'prefix' => 'store/{store_id}',
+        'middleware' => ['store_manage']
+    ], function(){
+        Route::put('/', [StoreController::class, 'update']);
+        Route::post('/photo', [ImageController::class, 'store_profile']);
 
-    Route::middleware('store_manage')
-            ->put('/store/{store_id}', [StoreController::class, 'update']);
+    });
 
 });
 #endregion

@@ -40,7 +40,7 @@ class StoreController extends Controller
             'coordinate' => 'required|string',
             'email' => 'string|email',
             'url' => 'string|url',
-            'telp' => 'string'
+            'telephone' => 'string'
         ]);
         $user = request()->user();
         $user->role |= Role::SELLER;
@@ -53,9 +53,9 @@ class StoreController extends Controller
             'location' => $fields['location'],
             'address' => $fields['address'],
             'coordinate' => $fields['coordinate'],
-            'email' => $fields['email'],
-            'url' => $fields['url'],
-            'telephone' => $fields['telephone'],
+            'email' => $fields['email']??'',
+            'url' => $fields['url']??'',
+            'telephone' => $fields['telephone']??'',
         ]);
         $store->handlers()->attach($user->id);
         return response($store, 201);
