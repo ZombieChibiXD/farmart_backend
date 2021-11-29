@@ -44,9 +44,11 @@ class ImageController extends Controller
         }
         $data = self::imageValidation($request,'images/user/profiles')[0];
         $imageStorage = Image::create($data);
+        unset($user->image);
+        unset($user->image_id);
         $user->image_id = $imageStorage->id;
         $user->save();
-        return ['user' => $user, 'image' => $imageStorage];
+        return $user;
     }
 
     public function store_profile(Request $request)
@@ -59,9 +61,11 @@ class ImageController extends Controller
         }
         $data = self::imageValidation($request,'images/stores/' . $store_id)[0];
         $imageStorage = Image::create($data);
+        unset($store->image);
+        unset($store->image_id);
         $store->image_id = $imageStorage->id;
         $store->save();
-        return ['store' => $store, 'image' => $imageStorage];
+        return $store;
     }
 
     public function add_product_image(Request $request){
@@ -77,7 +81,7 @@ class ImageController extends Controller
             $imagesStorages []= $imagesStorage;
             $product->images()->attach($imagesStorage->id);
         }
-        return ['images'=>$imagesStorages,'product'=>$product];
+        return $product;
     }
 
     public function remove_product_image(Request $request){
@@ -86,9 +90,9 @@ class ImageController extends Controller
         $product = Product::find($product_id);
         if($product->images->contains($image_id)){
             $product->images()->detach($image_id);
-            Image::destroy($image_id);
             unset($product->images);
             unset($product->product_images);
+            Image::destroy($image_id);
         }
         return $product;
     }
