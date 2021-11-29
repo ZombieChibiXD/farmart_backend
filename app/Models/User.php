@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\URL;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -50,12 +51,19 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $appends  = ['roles'];
+    protected $appends  = ['profile_image','roles'];
 
     public function stores()
     {
         return $this->belongsToMany(Store::class, 'store_sellers');
     }
+
+    public function getProfileImageAttribute()
+    {
+        if ($this->image) return $this->image->url;
+        return URL::to('/') . '/no_image_user.png';
+    }
+
     public function getRolesAttribute()
     {
         if ($this->role == 0)
@@ -71,5 +79,9 @@ class User extends Authenticatable
     public function owned_store()
     {
         return $this->hasMany(Store::class);
+    }
+    public function image()
+    {
+        return $this->belongsTo(Image::class);
     }
 }

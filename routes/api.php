@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\TesterController;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +33,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    Route::post('/user/photo', [ImageController::class, 'add_user_profile']);
     Route::middleware('role:' . Role::RESTRICTED)->get('/restricted', function(){
         return ['message'=>'You are restricted!'];
     });
@@ -77,3 +80,4 @@ Route::group([
 Route::get('/hello-world', function (){
     return 'Hello world!';
 });
+Route::get('/tester', [TesterController::class, 'tester']);

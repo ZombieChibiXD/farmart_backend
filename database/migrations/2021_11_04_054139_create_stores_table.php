@@ -21,7 +21,7 @@ class CreateStoresTable extends Migration
             $table->string('url')->default('');
             $table->string('email')->default('');
             $table->string('telephone')->default('');
-            $table->text('description')->default('');
+            $table->text('description');
             $table->string('location')->default('');
             $table->string('address')->default('');
             $table->string('coordinate')->default('');

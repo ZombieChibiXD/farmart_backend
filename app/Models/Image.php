@@ -4,27 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
-class ImagesStorage extends Model
+class Image extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'uri',
         'location',
         'active'
     ];
 
-    protected $appends  = ['image_url'];
+    protected $appends  = ['url'];
 
 
-    public function getImageUrlAttribute()
+    public function getUrlAttribute()
     {
-        if($this->local){
-            return URL::to('/storage') . '/' . $this->uri;
-        }
-        return $this->uri;
+        // if($this->local){
+        // }
+        return URL::to(Storage::url($this->location));
+        return $this->location;
     }
 
 }
