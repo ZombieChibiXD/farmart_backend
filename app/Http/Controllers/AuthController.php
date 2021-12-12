@@ -71,4 +71,15 @@ class AuthController extends Controller
         ];
         return response($response, 201);
     }
+    // Check if username or email is already taken
+    public function check(Request $request){
+        $request->validate([
+            'email' => 'required|string|email|unique:users,email',
+            'username' => 'required|string|unique:users,username',
+        ]);
+
+        return response([
+            'message' => 'Username/Email is available!'
+        ], 201);
+    }
 }
