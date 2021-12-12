@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CsrfController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
@@ -82,6 +83,7 @@ Route::group([
     Route::get  ('/products', [ProductController::class, 'ownned_products']);
     // Create a new product
     Route::post  ('/products', [ProductController::class, 'store']);
+
     Route::group([
         'prefix' => 'product/{product_id}',
         'middleware' => ['store_product_manage']
@@ -92,6 +94,17 @@ Route::group([
 
         Route::post ('/images', [ImageController::class, 'add_product_image']);
         Route::delete('/image/{image_id}', [ImageController::class, 'remove_product_image']);
+    });
+
+    // Expense route for store
+    Route::group([
+        'prefix' => 'expenses',
+    ], function(){
+        Route::get  ('/', [ExpenseController::class, 'index']);
+        Route::post  ('/', [ExpenseController::class, 'store']);
+        // Route::get  ('/{expense_id}', [ExpenseController::class, 'show']);
+        // Route::put   ('/{expense_id}', [ExpenseController::class, 'update']);
+        // Route::delete('/{expense_id}', [ExpenseController::class, 'destroy']);
     });
 });
 #endregion
