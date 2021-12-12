@@ -16,7 +16,7 @@ class KeyValueRequest
     {
         $name = $request->validate([
             'name' => 'required|string|in:' . implode(",",array_keys($requirement)),
-            'value' => 'required'
+            'value' => ''
         ]);
         return $request->validate([
             'name' => 'required|string',

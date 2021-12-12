@@ -40,8 +40,16 @@ class Product extends Model
      *
      * @var array
      */
-    protected $appends  = ['product_images'];
+    protected $appends  = ['product_images', 'location','type'];
 
+    public function getLocationAttribute()
+    {
+        return $this->store->location;
+    }
+    public function getTypeAttribute()
+    {
+        return $this->types->pluck('name')->toArray();
+    }
     public function getProductImagesAttribute()
     {
         if (count($this->images) > 0) {
@@ -59,6 +67,11 @@ class Product extends Model
     public function store()
     {
         return $this->belongsTo(Store::class);
+    }
+    public function types()
+    {
+        // Make many to many relationship with ProductType through pivot product_products_type table
+        return $this->belongsToMany(ProductsType::class, 'product_products_types', 'product_id', 'products_type_id');
     }
     public function orders()
     {

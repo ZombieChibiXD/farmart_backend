@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CsrfController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
@@ -22,11 +23,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register',    [AuthController::class, 'register']);
 Route::post('/login',       [AuthController::class, 'login']);
+Route::get('/csrf',       [CsrfController::class, 'index']);
+
+//Check if username or email is already taken
+Route::post('/check-username-or-email-exists',       [AuthController::class, 'check']);
+
 
 
 #region Generic user routes
 Route::group(['middleware' => ['auth:sanctum']], function(){
-    Route::get('/logout', [AuthController::class, 'logout']);
+    Route::delete('/logout', [AuthController::class, 'logout']);
     Route::get('/check_is_logged_in', function(){
         return 'You are logged in!';
     });
@@ -66,17 +72,21 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 #region Products
 // List all products
 Route::get('/products', [ProductController::class, 'index']);
-Route::get('/product/{id}', [ProductController::class, 'show']);
+Route::get('/products/locations', [ProductController::class, 'locations']);
+Route::get('/product/{product_id}', [ProductController::class, 'show']);
+
 Route::group([
     'prefix' => 'store/{store_id}',
     'middleware' => ['auth:sanctum', 'store_manage'],
 ], function(){
+    Route::get  ('/products', [ProductController::class, 'ownned_products']);
     // Create a new product
     Route::post  ('/products', [ProductController::class, 'store']);
     Route::group([
         'prefix' => 'product/{product_id}',
         'middleware' => ['store_product_manage']
     ], function(){
+        Route::get  ('/', [ProductController::class, 'show']);
         Route::put   ('/', [ProductController::class, 'update']);
         Route::delete('/', [ProductController::class, 'destroy']);
 

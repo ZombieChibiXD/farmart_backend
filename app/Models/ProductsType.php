@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductType extends Model
+class ProductsType extends Model
 {
     use HasFactory;
 
@@ -15,6 +15,8 @@ class ProductType extends Model
     ];
 
     public function products(){
-        return $this->belongsToMany(Store::class);
+        // Make Belongs to Many relationship to Product model through product_products_types table
+        return $this->belongsToMany(Product::class, 'product_products_types', 'products_type_id', 'product_id');
+
     }
 }
