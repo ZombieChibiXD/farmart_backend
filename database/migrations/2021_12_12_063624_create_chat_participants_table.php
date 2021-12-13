@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Role;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,8 +18,10 @@ class CreateChatParticipantsTable extends Migration
             $table->id();
 
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('store_id')->constrained('stores');
             $table->foreignId('chatroom_id')->constrained('chatrooms');
+            $table->bigInteger('role_flag')->default(Role::MEMBER);
+            $table->foreignId('store_id')->nullable()->constrained('stores');
+            $table->boolean('is_admin')->default(false);
             $table->timestamps();
         });
     }

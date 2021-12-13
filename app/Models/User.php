@@ -84,4 +84,15 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Image::class);
     }
+
+    // Relationship have many chatroom through chat participant
+    public function chatrooms_all()
+    {
+        return $this->hasManyThrough(Chatroom::class, ChatParticipant::class, 'user_id', 'id', 'id', 'chatroom_id');
+    }
+
+    public function chatrooms()
+    {
+        return $this->hasMany(Chatroom::class);
+    }
 }

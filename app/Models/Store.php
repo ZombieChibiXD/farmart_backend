@@ -54,4 +54,7 @@ class Store extends Model
     {
         return $this->belongsTo(Image::class);
     }
+    public function chatrooms(){
+        return $this->hasMany(Chatroom::class);
+    }
 }

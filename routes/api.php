@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CsrfController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ImageController;
@@ -113,3 +114,61 @@ Route::get('/hello-world', function (){
     return 'Hello world!';
 });
 Route::get('/tester', [TesterController::class, 'tester']);
+
+
+// Route for chatroom with middleware role restricted
+Route::group([
+    'prefix' => 'chatroom',
+    'middleware' => ['auth:sanctum']
+], function(){
+
+    // Prefix '{chatroom_id}'
+    Route::group(['prefix' => '{chatroom_id}'], function(){
+        // Route 'member' to controller messages_member
+        Route::get('/member', [ChatController::class, 'messages_member']);
+        // Route 'member' post to controller store_member
+        Route::post('/member', [ChatController::class, 'store_member']);
+
+        // Route group 'seller' with role seller and prefix seller
+        Route::group([
+            'prefix' => 'seller',
+            'middleware' => ['role:' . Role::SELLER]
+        ], function(){
+            // Route 'seller' to controller messages_seller
+            Route::get('/', [ChatController::class, 'messages_seller']);
+            // Route 'seller' post to controller store_seller
+            Route::post('/', [ChatController::class, 'store_seller']);
+        });
+
+        // Route group 'admin' with role admin and prefix admin
+        Route::group([
+            'prefix' => 'admin',
+            'middleware' => ['role:' . Role::ADMINISTRATOR]
+        ], function(){
+            // Route 'admin' to controller messages_admin
+            Route::get('/', [ChatController::class, 'messages_admin']);
+            // Route 'admin' post to controller store_admin
+            Route::post('/', [ChatController::class, 'store_admin']);
+        });
+
+
+    });
+});
+
+// Route prefix 'chatrooms'
+Route::group([
+    'prefix' => 'chatrooms',
+    'middleware' => ['auth:sanctum']
+], function(){
+    // Create member to store chatroom
+    Route::post('/member/{store_id}', [ChatController::class, 'create_member_to_seller']);
+
+    // Get all chatrooms for member
+    Route::get('/member', [ChatController::class, 'chatrooms_member']);
+    // Get all chatrooms for member
+    Route::get('/seller', [ChatController::class, 'chatrooms_seller'])->middleware('role:' . Role::SELLER);
+    // Get all chatrooms for admin
+    Route::get('/admin', [ChatController::class, 'chatrooms_admin'])->middleware('role:' . Role::ADMINISTRATOR);
+
+
+});

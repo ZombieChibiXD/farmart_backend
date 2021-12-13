@@ -15,6 +15,9 @@ class CreateChatroomsTable extends Migration
     {
         Schema::create('chatrooms', function (Blueprint $table) {
             $table->id();
+            $table->boolean('is_admin')->default(false);
+            $table->foreignId('store_id')->nullable()->constrained('stores');
+            $table->foreignId('user_id')->nullable()->constrained('users');
             $table->timestamps();
         });
     }
