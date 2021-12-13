@@ -95,4 +95,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Chatroom::class);
     }
+
+    public function likes_products()
+    {
+        return $this->belongsToMany(Product::class, 'likes_products');
+    }
 }

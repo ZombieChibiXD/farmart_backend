@@ -40,8 +40,18 @@ class Product extends Model
      *
      * @var array
      */
-    protected $appends  = ['product_images', 'location','type'];
+    protected $appends  = ['product_images', 'location','type', 'like'];
 
+    /**
+     * Get if product is liked by user.
+     */
+    public function getLikeAttribute()
+    {
+        if(auth()->check()) {
+            return $this->likes()->where('user_id', auth()->id())->exists();
+        }
+        return false;
+    }
     public function getLocationAttribute()
     {
         return $this->store->location;
@@ -80,5 +90,13 @@ class Product extends Model
     public function images()
     {
         return $this->belongsToMany(Image::class, 'product_images');
+    }
+
+    /**
+     * Liked by user.
+     */
+    public function likes()
+    {
+        return $this->belongsToMany(User::class, 'likes_products');
     }
 }

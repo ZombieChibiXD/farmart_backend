@@ -77,6 +77,15 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/locations', [ProductController::class, 'locations']);
 Route::get('/product/{product_id}', [ProductController::class, 'show']);
 
+// Route Group auth for products
+Route::group(['middleware' => ['auth:sanctum']], function(){
+    // Toggle Like product route
+    Route::post('/product/{product_id}/like', [ProductController::class, 'like']);
+    // User liked products
+    Route::get('/products/likes', [ProductController::class, 'likes']);
+});
+
+
 Route::group([
     'prefix' => 'store/{store_id}',
     'middleware' => ['auth:sanctum', 'store_manage'],
@@ -160,15 +169,27 @@ Route::group([
     'prefix' => 'chatrooms',
     'middleware' => ['auth:sanctum']
 ], function(){
+    // Get all chatrooms for member
+    Route::get('/member', [ChatController::class, 'chatrooms_member']);
     // Create member to store chatroom
     Route::post('/member/{store_id}', [ChatController::class, 'create_member_to_seller']);
 
     // Get all chatrooms for member
-    Route::get('/member', [ChatController::class, 'chatrooms_member']);
-    // Get all chatrooms for member
     Route::get('/seller', [ChatController::class, 'chatrooms_seller'])->middleware('role:' . Role::SELLER);
-    // Get all chatrooms for admin
-    Route::get('/admin', [ChatController::class, 'chatrooms_admin'])->middleware('role:' . Role::ADMINISTRATOR);
+
+    // Route Group by ADMINISTRATOR role and prefix 'admin'
+    Route::group([
+        'prefix' => 'admin',
+        'middleware' => ['role:' . Role::ADMINISTRATOR]
+    ], function(){
+        // Get all chatrooms for admin
+        Route::get('/', [ChatController::class, 'chatrooms_admin']);
+        // Create admin to member chatroom
+        Route::post('/member/{member_id}', [ChatController::class, 'chat_admin_to_member']);
+
+    });
+
+
 
 
 });

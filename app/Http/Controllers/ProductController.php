@@ -130,7 +130,43 @@ class ProductController extends Controller
                 'message' => 'Product does not exist!'
             ], 401);
         }
+        $product['like'] = false;
+        if(auth()->check()){
+            $product['like'] = request()->user()->likes_product()->where('product_id', $id)->exists();
+        }
         return response($product);
+    }
+    /**
+     * Tpggle Like the specified product
+     *
+     */
+    public function like()
+    {
+        $id = request()->route('product_id');
+        $product = Product::find($id);
+        if (!$product) {
+            return response([
+                'message' => 'Product does not exist!'
+            ], 401);
+        }
+        if(auth()->check()){
+            $user = request()->user();
+            if($user->likes_products()->where('product_id', $id)->exists()){
+                $user->likes_products()->detach($id);
+            }else{
+                $user->likes_products()->attach($id);
+            }
+        }
+        return response($product);
+    }
+    /**
+     * Likes products
+     */
+    public function likes()
+    {
+        $user = request()->user();
+        $products = $user->likes_products()->get();
+        return response($products);
     }
 
     /**
