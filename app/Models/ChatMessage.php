@@ -15,13 +15,11 @@ class ChatMessage extends Model
     ];
     protected $attributes = [
         'content' => '',
-        'chat_participant_id' => null,
+        'chat_participant_id' => null
     ];
-
-
     // Chat messages belongs to owner
     public function owner()
     {
-        return $this->hasOne(ChatParticipant::class);
+        return $this->belongsTo(ChatParticipant::class, 'chat_participant_id');
     }
 }

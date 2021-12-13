@@ -32,7 +32,7 @@ class ChatController extends Controller
     /**
      * Create chatroom by member to seller
      */
-    public function create_member_to_seller(Request $request)
+    public function chat_member_to_seller(Request $request)
     {
         // Get store_id from route
         $store_id = $request->route('store_id');
@@ -46,6 +46,20 @@ class ChatController extends Controller
                 'message' => 'Store not found',
             ], 404);
         }
+
+        // Find chatroom with store_id and user_id
+        $chatroom = Chatroom::where('store_id', $store_id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if($chatroom) {
+            // Return chatroom with participants and details
+            return response()->json([
+                'chatroom' => $chatroom,
+                'details' => $chatroom->details,
+            ], 200);
+        }
+
 
         $chatroom = new Chatroom();
         $chatroom->store_id = $store_id;
@@ -63,6 +77,56 @@ class ChatController extends Controller
         return response()->json([
             'chatroom' => $chatroom,
             'details' => $chatroom->getDetailsAsMember(),
+        ], 200);
+    }
+
+
+    /**
+     * Create chatroom by admin to member
+     */
+    public function chat_admin_to_member(Request $request)
+    {
+        // Get member_id from route
+        $member_id = $request->route('member_id');
+
+        // Find member
+        $member = User::find($member_id);
+
+        // If store is not found
+        if (!$member) {
+            return response()->json([
+                'message' => 'Member not found',
+            ], 404);
+        }
+
+        // Find a chatroom containing member and chatroom is_admin
+        $chatroom = Chatroom::where('user_id', $member_id)
+            ->where('is_admin', true)
+            ->first();
+
+        if($chatroom){
+            return response()->json([
+                'chatroom' => $chatroom,
+                'details' => $chatroom->getDetailsAsAdmin(),
+            ], 200);
+        }
+
+
+        $chatroom = new Chatroom();
+        $chatroom->user_id = $member->id;
+        $chatroom->is_admin = true;
+        $chatroom->save();
+        if(!$chatroom->save()){
+            return response()->json([
+                'message' => 'Chatroom not created',
+            ], 404);
+        }
+        $chatroom->addAdminParticipants();
+        $chatroom->addMemberParticipant($member);
+
+        return response()->json([
+            'chatroom' => $chatroom,
+            'details' => $chatroom->getDetailsAsAdmin(),
         ], 200);
     }
 
@@ -316,7 +380,7 @@ class ChatController extends Controller
 
 
         // Check if chatroom exists
-        $chatroom = request()->user()->chatrooms()->find($chatroom_id);
+        $chatroom = Chatroom::find($chatroom_id);
         if (!$chatroom) {
             return response()->json(['message' => 'Chatroom not found'], 404);
         }
@@ -325,7 +389,10 @@ class ChatController extends Controller
         $current_participant = $chatroom->participants()->where('user_id', $request->user()->id)
                                                 ->where('role_flag', Role::ADMINISTRATOR)->first();
         if (!$current_participant) {
-            return response()->json(['message' => 'Participant not found'], 404);
+            $chatroom->participants()->create([
+                'user_id' => $request->user()->id,
+                'role_flag' => Role::ADMINISTRATOR,
+            ]);
         }
 
         $chatroom->load('messages');
@@ -371,16 +438,34 @@ class ChatController extends Controller
     {
         // Get chatrooms from user
         $chatrooms = request()->user()->chatrooms->unique('id');
-        // Filter out chatrooms where user is not current_participant that is member
+        // Filter out chatrooms where user is not current_participant that is seller
         $chatrooms = $chatrooms->filter(function ($chatroom) {
             return $chatroom->participants
                             ->where('user_id', request()->user()->id)
-                            ->where('role_flag', Role::MEMBER)
+                            ->where('role_flag', Role::SELLER)
                             ->count() > 0;
         });
         // Return as json
         return response()->json($chatrooms->map(function ($chatroom) {
             return $chatroom->getDetailsAsStore();
+        }), 200);
+
+
+    }
+
+    /**
+     * Get List of chatrooms as admin
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function chatrooms_admin(Request $request)
+    {
+        // Get all chatrooms where is_admin is true
+        $chatrooms = Chatroom::where('is_admin', true)->get();
+
+        // Return as json
+        return response()->json($chatrooms->map(function ($chatroom) {
+            return $chatroom->getDetailsAsAdmin();
         }), 200);
 
 

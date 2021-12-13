@@ -12,8 +12,8 @@ class Chatroom extends Model
 
     protected $attributes = [
         'is_admin' => false,
-        'store_id' => 0,
-        'user_id' => 0,
+        'store_id' => null,
+        'user_id' => null,
     ];
 
 
@@ -116,7 +116,7 @@ class Chatroom extends Model
      */
     public function addAdminParticipants()
     {
-        $admins = User::whereRaw('role & ? == ?', [Role::ADMINISTRATOR, Role::ADMINISTRATOR])->get();
+        $admins = User::whereRaw('role & ? = ?', [Role::ADMINISTRATOR, Role::ADMINISTRATOR])->get();
 
         return $this->participants()->createMany(
             $admins->map(function ($admin) {
@@ -133,7 +133,7 @@ class Chatroom extends Model
     // ChatMessage many through ChatParticipant
     public function messages()
     {
-        return $this->hasManyThrough(ChatMessage::class, ChatParticipant::class, 'chatroom_id', 'chat_participant_id', 'id', 'id');
+        return $this->hasManyThrough(ChatMessage::class, ChatParticipant::class, 'chatroom_id', 'chat_participant_id', 'id', 'id')->orderBy('created_at', 'desc');
     }
     //ChatParticipant
     public function participants()
