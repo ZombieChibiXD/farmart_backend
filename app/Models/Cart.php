@@ -13,7 +13,8 @@ class Cart extends Model
         'product_id',
         'amount',
     ];
+    protected $with = ['product'];
     public function product(){
-        return $this->hasMany(Product::class);
+        return $this->belongsTo(Product::class);
     }
 }

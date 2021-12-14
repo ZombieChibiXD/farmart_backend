@@ -28,12 +28,13 @@ class Store extends Model
         'telephone',
     ];
 
+
     /**
      * Appended attributes.
      *
      * @var array
      */
-    protected $appends  = ['profile_image'];
+    protected $appends  = ['profile_image', 'total_products', 'total_orders', 'total_sales', 'total_reviews', 'stars'];
 
     public function getProfileImageAttribute()
     {
@@ -57,4 +58,46 @@ class Store extends Model
     public function chatrooms(){
         return $this->hasMany(Chatroom::class);
     }
+    public function orders(){
+        return $this->hasManyThrough(OrderDetail::class, Product::class);
+    }
+    public function reviews(){
+        return $this->hasManyThrough(ProductReviews::class, Product::class);
+    }
+
+    public function getTotalProductsAttribute()
+    {
+        return $this->products()->count();
+    }
+
+    public function getTotalOrdersAttribute()
+    {
+        return $this->orders()->count();
+    }
+
+    public function getTotalSalesAttribute()
+    {
+        return $this->orders()->sum('subtotal');
+    }
+
+    public function getTotalReviewsAttribute()
+    {
+        return $this->reviews()->count();
+    }
+
+    public function getStarsAttribute()
+    {
+        $reviews = $this->reviews()->get();
+        $total = $reviews->count();
+        $stars = 0;
+        if ($total > 0) {
+            foreach ($reviews as $review) {
+                $stars += $review->stars;
+            }
+            return $stars / $total;
+        }
+        return 0;
+    }
+
+
 }

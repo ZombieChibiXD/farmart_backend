@@ -132,7 +132,7 @@ class ProductController extends Controller
         }
         $product['like'] = false;
         if(auth()->check()){
-            $product['like'] = request()->user()->likes_product()->where('product_id', $id)->exists();
+            $product['like'] = request()->user()->likes_products()->where('product_id', $id)->exists();
         }
         return response($product);
     }

@@ -21,7 +21,6 @@ class CreateOrdersTable extends Migration
             $table->text('dropoff_location');
             $table->string('transaction_code',50);
             $table->string('courrier_code',50);
-            
             $table->timestamps();
         });
     }

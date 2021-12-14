@@ -40,17 +40,38 @@ class Product extends Model
      *
      * @var array
      */
-    protected $appends  = ['product_images', 'location','type', 'like', 'stars', 'reviews_count'];
+    protected $appends  = [
+        'product_images','location', 'type', 'like', 'stars', 'reviews_count',
+        'sold'
+    ];
+
+    /**
+     * Get sold products through order_details attribute which it's parent  order relationship is completed
+     */
+    public function getSoldAttribute()
+    {
+        // Count all order details that has this product and the order is completed
+        $order_details = $this->order_details()->whereHas('order', function ($query) {
+            $query->where('status', Order::STATUS_DELIVERED);
+        })->get();
+        // Count all quantity of order details
+        return $order_details->sum('quantity');
+    }
+
 
     /**
      * Get if product is liked by user.
      */
     public function getLikeAttribute()
     {
-        if(auth()->check()) {
+        if (auth()->check()) {
             return $this->likes()->where('user_id', auth()->id())->exists();
         }
         return false;
+    }
+    public function order_details()
+    {
+        return $this->hasMany(OrderDetail::class);
     }
     public function getLocationAttribute()
     {
@@ -125,5 +146,10 @@ class Product extends Model
     public function getReviewsCountAttribute()
     {
         return $this->reviews()->count();
+    }
+
+    public function cart()
+    {
+        return $this->hasMany(Cart::class);
     }
 }
