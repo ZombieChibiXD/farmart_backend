@@ -40,7 +40,7 @@ class Product extends Model
      *
      * @var array
      */
-    protected $appends  = ['product_images', 'location','type', 'like'];
+    protected $appends  = ['product_images', 'location','type', 'like', 'stars', 'reviews_count'];
 
     /**
      * Get if product is liked by user.
@@ -98,5 +98,32 @@ class Product extends Model
     public function likes()
     {
         return $this->belongsToMany(User::class, 'likes_products');
+    }
+
+    /**
+     * Reviews by user
+     */
+    public function reviews()
+    {
+        return $this->hasMany(ProductReviews::class);
+    }
+    /**
+     * Get average stars of product.
+     */
+    public function getStarsAttribute()
+    {
+        $reviews = $this->reviews()->get();
+        $stars = -1;
+        if (count($reviews) > 0) {
+            $stars = $reviews->avg('stars');
+        }
+        return $stars;
+    }
+    /**
+     * Get count of reviews of product.
+     */
+    public function getReviewsCountAttribute()
+    {
+        return $this->reviews()->count();
     }
 }

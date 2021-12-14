@@ -76,6 +76,11 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/locations', [ProductController::class, 'locations']);
 Route::get('/product/{product_id}', [ProductController::class, 'show']);
+// Get product reviews overview
+Route::get('/product/{product_id}/reviews', [ProductController::class, 'reviews']);
+// Get product limited by 5 reviews
+Route::get('/product/{product_id}/reviews/compact', [ProductController::class, 'reviews_limited']);
+
 
 // Route Group auth for products
 Route::group(['middleware' => ['auth:sanctum']], function(){
@@ -83,6 +88,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/product/{product_id}/like', [ProductController::class, 'like']);
     // User liked products
     Route::get('/products/likes', [ProductController::class, 'likes']);
+    // Review product
+    Route::post('/products/review', [ProductController::class, 'review']);
 });
 
 

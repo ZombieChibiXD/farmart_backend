@@ -100,4 +100,13 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Product::class, 'likes_products');
     }
+
+    /**
+     * Makes product reviews
+     *
+     */
+    public function reviews()
+    {
+        return $this->hasMany(ProductReviews::class);
+    }
 }

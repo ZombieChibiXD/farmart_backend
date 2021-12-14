@@ -209,4 +209,60 @@ class ProductController extends Controller
             'message' => 'An unknown error has occured!!'
         ], 501);
     }
+
+    /**
+     * Store product review with stars
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function review(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'stars' => 'required|integer|between:1,5',
+            'review' => 'required|string'
+        ]);
+        $product = Product::find($request->product_id);
+        $product->reviews()->create([
+            'user_id' => auth()->id(),
+            'stars' => $request->stars,
+            'review' => $request->review
+        ]);
+        return response([
+            'message' => 'Review have been added!'
+        ], 201);
+    }
+
+    /**
+     * Get product reviews
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reviews(Request $request)
+    {
+        $product_id = $request->route('product_id');
+        $product = Product::find($product_id);
+        if (!$product) {
+            return response([
+                'message' => 'Product does not exist!'
+            ], 401);
+        }
+        return response($product->reviews);
+    }
+
+    /**
+     * Get product reviews limited by 5
+     */
+    public function reviews_limited()
+    {
+        $product_id = request()->route('product_id');
+        $product = Product::find($product_id);
+        if (!$product) {
+            return response([
+                'message' => 'Product does not exist!'
+            ], 401);
+        }
+        return response($product->reviews()->limit(5)->get());
+    }
 }
