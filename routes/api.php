@@ -27,28 +27,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register',    [AuthController::class, 'register']);
 Route::post('/login',       [AuthController::class, 'login']);
-Route::get('/csrf',       [CsrfController::class, 'index']);
 
 //Check if username or email is already taken
 Route::post('/check-username-or-email-exists',       [AuthController::class, 'check']);
 
 
 
-#region Generic user routes
+#region User General
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/logout', [AuthController::class, 'logout']);
-    Route::get('/check_is_logged_in', function () {
-        return 'You are logged in!';
-    });
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    Route::get('/user', function (Request $request) { return $request->user(); });
     Route::post('/user/photo', [ImageController::class, 'user_profile']);
     Route::middleware('role:' . Role::RESTRICTED)->get('/restricted', function () {
         return ['message' => 'You are restricted!'];
-    });
-    Route::middleware('role:' . (Role::MEMBER | Role::SELLER))->get('/member_seller', function () {
-        return ['message' => 'You are seller and member!'];
     });
 });
 #endregion
@@ -56,11 +47,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 #region Store
 // Get store by ID and gets the general data about the store
 Route::get('/store/{id}', [StoreController::class, 'show']);
+
 Route::group(['middleware' => ['auth:sanctum']], function () {
     // List stores that user can handle
     Route::get('/stores', [StoreController::class, 'index']);
     // Creates a new store for user
     Route::post('/stores', [StoreController::class, 'store']);
+
     Route::group([
         'prefix' => 'store/{store_id}',
         'middleware' => ['store_manage']
@@ -124,76 +117,48 @@ Route::group([
         // Route::delete('/{expense_id}', [ExpenseController::class, 'destroy']);
     });
 });
-#endregion
+#endregion Product
 
-Route::get('/hello-world', function () {
-    return 'Hello world!';
-});
-Route::get('/tester', [TesterController::class, 'tester']);
-
-
-// Route for chatroom with middleware role restricted
+#region Expenses
 Route::group([
-    'prefix' => 'chatroom',
-    'middleware' => ['auth:sanctum']
+    'prefix' => 'store/{store_id}',
+    'middleware' => ['auth:sanctum', 'store_manage'],
 ], function () {
-
-    // Prefix '{chatroom_id}'
-    Route::group(['prefix' => '{chatroom_id}'], function () {
-        // Route 'member' to controller messages_member
-        Route::get('/member', [ChatController::class, 'messages_member']);
-        // Route 'member' post to controller store_member
-        Route::post('/member', [ChatController::class, 'store_member']);
-
-        // Route group 'seller' with role seller and prefix seller
-        Route::group([
-            'prefix' => 'seller',
-            'middleware' => ['role:' . Role::SELLER]
-        ], function () {
-            // Route 'seller' to controller messages_seller
-            Route::get('/', [ChatController::class, 'messages_seller']);
-            // Route 'seller' post to controller store_seller
-            Route::post('/', [ChatController::class, 'store_seller']);
-        });
-
-        // Route group 'admin' with role admin and prefix admin
-        Route::group([
-            'prefix' => 'admin',
-            'middleware' => ['role:' . Role::ADMINISTRATOR]
-        ], function () {
-            // Route 'admin' to controller messages_admin
-            Route::get('/', [ChatController::class, 'messages_admin']);
-            // Route 'admin' post to controller store_admin
-            Route::post('/', [ChatController::class, 'store_admin']);
-        });
+    // Expense route for store
+    Route::group([
+        'prefix' => 'expenses',
+    ], function () {
+        Route::get('/', [ExpenseController::class, 'index']);
+        Route::post('/', [ExpenseController::class, 'store']);
+        // Route::get  ('/{expense_id}', [ExpenseController::class, 'show']);
+        // Route::put   ('/{expense_id}', [ExpenseController::class, 'update']);
+        // Route::delete('/{expense_id}', [ExpenseController::class, 'destroy']);
     });
 });
+#endregion Expenses
 
+#region Chat
 // Route prefix 'chatrooms'
 Route::group([
     'prefix' => 'chatrooms',
     'middleware' => ['auth:sanctum']
 ], function () {
-    // Get all chatrooms for member
-    Route::get('/member', [ChatController::class, 'chatrooms_member']);
-    // Create member to store chatroom
-    Route::post('/member/{store_id}', [ChatController::class, 'create_member_to_seller']);
+    Route::get('/', [ChatController::class, 'index']);
+    Route::post('/', [ChatController::class, 'store']);
 
-    // Get all chatrooms for member
-    Route::get('/seller', [ChatController::class, 'chatrooms_seller'])->middleware('role:' . Role::SELLER);
-
-    // Route Group by ADMINISTRATOR role and prefix 'admin'
-    Route::group([
-        'prefix' => 'admin',
-        'middleware' => ['role:' . Role::ADMINISTRATOR]
-    ], function () {
-        // Get all chatrooms for admin
-        Route::get('/', [ChatController::class, 'chatrooms_admin']);
-        // Create admin to member chatroom
-        Route::post('/member/{member_id}', [ChatController::class, 'chat_admin_to_member']);
-    });
 });
 
+
+// Route prefix 'chatrooms'
+Route::group([
+    'prefix' => 'chatroom',
+    'middleware' => ['auth:sanctum']
+], function () {
+    Route::get('/', [ChatController::class, 'initial_messages']);
+    Route::get('/refresh', [ChatController::class, 'messages']);
+    Route::post('/', [ChatController::class, 'send_message']);
+});
+#endregion Chat
 
 // Route prefix 'cart'
 Route::group([
@@ -209,6 +174,15 @@ Route::group([
     // Delete cart item
     Route::delete('/{item_id}', [CartController::class, 'destroy']);
 });
+
+
+
+
+
+
+
+
+
 
 
 // Route prefix 'admin'

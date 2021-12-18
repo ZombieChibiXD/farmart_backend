@@ -10,6 +10,11 @@ class Chatroom extends Model
 {
     use HasFactory;
 
+    // Constant Default Lost Chat Name
+    const DEFAULT_LOST_CHAT_NAME = 'Lost Chat';
+    // Constant Default Lost Chat Image
+    const DEFAULT_LOST_CHAT_IMAGE = 'https://via.placeholder.com/150';
+
     protected $attributes = [
         'is_admin' => false,
         'store_id' => null,
@@ -17,10 +22,108 @@ class Chatroom extends Model
     ];
 
 
+    public static function cast(self $obj) : self
+    {
+        return $obj;
+    }
+
+    public static function findOrCreateMemberStore($user_id, $store_id) : self
+    {
+        $chatroom = Chatroom::where('user_id', $user_id)->where('store_id', $store_id)->first();
+        if ($chatroom) {
+            return $chatroom;
+        }
+
+        $chatroom = new Chatroom();
+        $chatroom->user_id = $user_id;
+        $chatroom->store_id = $store_id;
+        $chatroom->save();
+
+        // Create user as participant
+        $chatroom->participants()->create([
+            'user_id' => $user_id,
+        ]);
+
+        return $chatroom;
+    }
+
+    public static function findOrCreateMemberAdmin($user_id) : self
+    {
+        $chatroom = Chatroom::where('user_id', $user_id)->where('is_admin', true)->first();
+        if ($chatroom) {
+            return $chatroom;
+        }
+
+        $chatroom = new Chatroom();
+        $chatroom->user_id = $user_id;
+        $chatroom->is_admin = true;
+        $chatroom->save();
+
+        // Create user as participant
+        $chatroom->participants()->create([
+            'user_id' => $user_id,
+        ]);
+
+        return $chatroom;
+    }
+
+    public static function findOrCreateStoreAdmin($store_id) : self
+    {
+        $chatroom = Chatroom::where('store_id', $store_id)->where('is_admin', true)->first();
+        if ($chatroom) {
+            return $chatroom;
+        }
+
+        $chatroom = new Chatroom();
+        $chatroom->store_id = $store_id;
+        $chatroom->is_admin = true;
+        $chatroom->save();
+
+        return $chatroom;
+    }
+
+    public function findOrCreateMemberParticipant($user_id) : ChatParticipant
+    {
+        $participant = $this->participants()->where('user_id', $user_id)->where('role_flag', Role::MEMBER)->first();
+        if ($participant) {
+            return $participant;
+        }
+        return $this->participants()->create([
+            'user_id' => $user_id,
+            'role_flag' => Role::MEMBER,
+        ]);
+    }
+
+    public function findOrCreateSellerParticipant($user_id, $store_id) : ChatParticipant
+    {
+        $participant = $this->participants()->where('user_id', $user_id)->where('role_flag', Role::SELLER)->first();
+        if ($participant) {
+            return $participant;
+        }
+        return $this->participants()->create([
+            'user_id' => $user_id,
+            'role_flag' => Role::SELLER,
+            'store_id' => $store_id,
+        ]);
+    }
+
+    public function findOrCreateAdminParticipant($user_id) : ChatParticipant
+    {
+        $participant = $this->participants()->where('user_id', $user_id)->where('role_flag', Role::ADMINISTRATOR)->first();
+        if ($participant) {
+            return $participant;
+        }
+        return $this->participants()->create([
+            'user_id' => $user_id,
+            'role_flag' => Role::ADMINISTRATOR,
+            'is_admin' => true,
+        ]);
+    }
+
     public function getDetailsAsMember()
     {
-        $name = 'Lost Chat';
-        $image = 'https://via.placeholder.com/150';
+        $name = self::DEFAULT_LOST_CHAT_NAME;
+        $image = self::DEFAULT_LOST_CHAT_IMAGE;
 
         if ($this->is_admin) {
             $name = 'Administrator';
@@ -42,8 +145,8 @@ class Chatroom extends Model
     }
     public function getDetailsAsStore()
     {
-        $name = 'Lost Chat';
-        $image = 'https://via.placeholder.com/150';
+        $name = self::DEFAULT_LOST_CHAT_NAME;
+        $image = self::DEFAULT_LOST_CHAT_IMAGE;
 
         if ($this->is_admin) {
             $name = 'Administrator';
@@ -67,8 +170,8 @@ class Chatroom extends Model
     // Get details of the chatroom as admin
     public function getDetailsAsAdmin()
     {
-        $name = 'Lost Chat';
-        $image = 'https://via.placeholder.com/150';
+        $name = self::DEFAULT_LOST_CHAT_NAME;
+        $image = self::DEFAULT_LOST_CHAT_IMAGE;
 
         if ($this->user) {
             $name = $this->user->firstname . ' ' . $this->user->lastname;
@@ -88,45 +191,6 @@ class Chatroom extends Model
             'name' => $name,
             'profile_image' => $image,
         ];
-    }
-
-    public function addMemberParticipant(User $member)
-    {
-        return $this->participants()->create([
-            'user_id' => $member->id,
-            'role_id' => Role::MEMBER,
-        ]);
-    }
-
-    public function addSellerParticipants(Store $store)
-    {
-        return $this->participants()->createMany(
-            $store->handlers->map(function ($seller) use ($store) {
-                return [
-                    'user_id' => $seller->id,
-                    'role_flag' => Role::SELLER,
-                    'store_id' => $store->id,
-                ];
-            })->toArray()
-        );
-    }
-
-    /**
-     * Add admin participant to chatroom
-     */
-    public function addAdminParticipants()
-    {
-        $admins = User::whereRaw('role & ? = ?', [Role::ADMINISTRATOR, Role::ADMINISTRATOR])->get();
-
-        return $this->participants()->createMany(
-            $admins->map(function ($admin) {
-                return [
-                    'user_id' => $admin->id,
-                    'role_flag' => Role::ADMINISTRATOR,
-                    'is_admin' => true,
-                ];
-            })->toArray()
-        );
     }
 
     // Relationships

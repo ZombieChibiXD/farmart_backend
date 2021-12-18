@@ -53,9 +53,27 @@ class User extends Authenticatable
      */
     protected $appends  = ['profile_image','roles'];
 
-    public function stores()
+
+    /**
+     * Check if user manages a store by ID.
+     *
+     * @param int $store_id
+     * @return bool
+     */
+    public function managesStore(int $store_id)
     {
-        return $this->belongsToMany(Store::class, 'store_sellers');
+        return $this->stores->contains($store_id);
+    }
+
+    /**
+     * Check if user has a role.
+     *
+     * @param int $role
+     * @return bool
+     */
+    public function hasRole(int $role)
+    {
+        return $this->role & $role;
     }
 
     public function getProfileImageAttribute()
@@ -76,6 +94,13 @@ class User extends Authenticatable
         }
         return $user_roles;
     }
+
+
+    public function stores()
+    {
+        return $this->belongsToMany(Store::class, 'store_sellers');
+    }
+
     public function owned_store()
     {
         return $this->hasMany(Store::class);
