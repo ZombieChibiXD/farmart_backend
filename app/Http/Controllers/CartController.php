@@ -42,14 +42,23 @@ class CartController extends Controller
                 return response()->json(['message' => 'Item not found in cart.'], 404);
             }
         }
-
-        // Add item to cart
-        $user->cart()->updateOrCreate(
-            ['product_id' => $request->product_id],
-            ['amount' => $request->amount]
-        );
-
-        return response()->json(['message' => 'Item added to cart.']);
+        // Find or add item to cart
+        $item = $user->cart->where('product_id', $request->product_id)->first();
+        if ($item) {
+            // Update item amount
+            $result = $item->update(['amount' => $request->amount]);
+            if ($result) return response()->json(['message' => 'Cart item updated!']);
+            else return response()->json(['message' => 'Cart item update failed'], 500);
+        } else {
+            // Add item to cart
+            $result = $user->cart()->updateOrCreate(
+                ['product_id' => $request->product_id],
+                ['amount' => $request->amount]
+            );
+            if ($result) return response()->json(['message' => 'Item added to cart!']);
+            else return response()->json(['message' => 'Cart item addition failed'], 500);
+        }
+        return response()->json(['message' => 'Unknown server error.'], 500);
     }
 
     /**
@@ -156,7 +165,7 @@ class CartController extends Controller
             // For each cart item
             foreach ($cart_items as $item) {
 
-                // Substraction of product stock and amount and save
+                // Subtraction of product stock and amount and save
                 $item->product->stock -= $item->amount;
                 $item->product->save();
                 // If there is product sale price, use it
@@ -215,20 +224,13 @@ class CartController extends Controller
             }
         }
 
-        $timeStr = Str::upper(Str::padLeft(base_convert(time(), 10, 36), 8, '0'));
-        $uidStr = Str::upper(Str::padLeft(base_convert($user->id, 5, 36), 5, '0'));
-        $randomStr = Str::upper(Str::random(5));
-
-
-        // Create transaction code tied to user, time and random upper case letters
-        $code = $randomStr . '-' . $timeStr . '-' . $uidStr;
 
         // Create order
         $order = Order::create([
             'user_id' => $user->id,
             'store_id' => $request->store_id,
             'total' => $total,
-            'transaction_code' => $code,
+            'transaction_code' => '',
             'dropoff_location' => $request->address
         ]);
 
@@ -240,6 +242,13 @@ class CartController extends Controller
                     $item->product->save();
                 }
             }
+            return response()->json(['message' => 'Order could not be created.'], 422);
+        }
+        $order->transaction_code = OrderController::generateTransactionCode($user->id, $order->created_at->timestamp);
+
+        // If transaction code save failed
+        if (!$order->save()) {
+            $order->delete();
             return response()->json(['message' => 'Order could not be created.'], 422);
         }
 
