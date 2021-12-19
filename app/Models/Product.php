@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\URL;
 class Product extends Model
 {
     use HasFactory;
+
+    const UNLISTED = 'unlisted';
+    const LISTED = null;
+
     const FIELDS = [
         'fullname' => 'required|string',
         'shortname' => 'required|string',
@@ -22,6 +26,17 @@ class Product extends Model
         'sold' => 'numeric',
         'likes' => 'numeric',
     ];
+
+    protected $attributes = [
+        'labeled' => self::UNLISTED,
+    ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'images',
+    ];
+
 
     protected $fillable = [
         'store_id',

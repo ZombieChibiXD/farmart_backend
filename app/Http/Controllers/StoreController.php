@@ -104,6 +104,8 @@ class StoreController extends Controller
         ];
 
         $fields = KeyValueRequest::requirements($request, $requirement);
-        return KeyValueRequest::updateModel(Store::class, $store_id, $fields);
+        return KeyValueRequest::updateModelWithResponse(Store::class, $store_id, $fields, function (Store $store) {
+            return response()->json($store, 200);
+        });
     }
 }

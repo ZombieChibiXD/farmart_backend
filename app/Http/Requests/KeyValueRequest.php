@@ -2,11 +2,15 @@
 
 namespace App\Http\Requests;
 
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class KeyValueRequest
 {
+    const ITEM_NOT_FOUND = -1;
+    const ITEM_NOT_UPDATED = 0;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,14 +31,27 @@ class KeyValueRequest
     public static function updateModel(string $classStr, int $id, array $fields){
         $class = $classStr::find($id);
         if (!$class) {
-            return response([
-                'message' => 'Item does not exist!'
-            ], 401);
+            return self::ITEM_NOT_FOUND;
         }
 
         $class[$fields['name']] = $fields['value'];
         if ($class->save())
-            return response($class);
-        return response(['message' => 'Failure'], 500);
+            return $class;
+        return self::ITEM_NOT_UPDATED;
+    }
+
+    public static function updateModelWithResponse(string $classStr, int $id, array $fields, Closure $callback){
+        $class = self::updateModel($classStr, $id, $fields);
+        if ($class == self::ITEM_NOT_FOUND) {
+            return response([
+                'message' => 'Item not found!'
+            ], 401);
+        }
+        if ($class == self::ITEM_NOT_UPDATED) {
+            return response([
+                'message' => 'An unknown error has occured!!'
+            ], 501);
+        }
+        return $callback($class);
     }
 }

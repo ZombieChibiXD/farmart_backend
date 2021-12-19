@@ -16,6 +16,7 @@ class CreateOrdersTable extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('store_id')->constrained('stores');
             $table->bigInteger('total');
             $table->bigInteger('status');
             $table->text('dropoff_location');

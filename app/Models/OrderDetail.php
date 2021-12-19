@@ -20,9 +20,16 @@ class OrderDetail extends Model
         'subtotal',
     ];
 
+    protected $with = [
+        'product',
+    ];
+
 
     function order()
     {
         return $this->belongsTo(Order::class);
+    }
+    function product(){
+        return $this->belongsTo(Product::class);
     }
 }

@@ -63,7 +63,6 @@ class ProductController extends Controller
 
         // return products as json
         return response()->json($products);
-
     }
 
 
@@ -78,6 +77,10 @@ class ProductController extends Controller
         $store_id = $request->route('store_id');
         // Get all products where store_id is equal to the store_id in the route only
         $products = Product::where('store_id', $store_id)->get();
+        // Set store and images hidden
+        $products->each(function ($product) {
+            $product->setHidden(['store', 'images']);
+        });
         // return products as json
         return response()->json($products);
     }
@@ -112,6 +115,9 @@ class ProductController extends Controller
         $fields = $request->validate(Product::FIELDS);
         // $data = ['store_id' => $store_id, ...$fields];
         $product = Product::create(array_merge(['store_id' => $store_id], $fields));
+
+        // Set store and images as hidden from product
+        $product->setHidden(['store']);
         return response($product, 201);
     }
 
@@ -131,7 +137,7 @@ class ProductController extends Controller
             ], 401);
         }
         $product['like'] = false;
-        if(auth()->check()){
+        if (auth()->check()) {
             $product['like'] = request()->user()->likes_products()->where('product_id', $id)->exists();
         }
         return response($product);
@@ -149,11 +155,11 @@ class ProductController extends Controller
                 'message' => 'Product does not exist!'
             ], 401);
         }
-        if(auth()->check()){
+        if (auth()->check()) {
             $user = request()->user();
-            if($user->likes_products()->where('product_id', $id)->exists()){
+            if ($user->likes_products()->where('product_id', $id)->exists()) {
                 $user->likes_products()->detach($id);
-            }else{
+            } else {
                 $user->likes_products()->attach($id);
             }
         }
@@ -186,7 +192,10 @@ class ProductController extends Controller
         if ($fields['value'] == '' || $fields['value'] == ' ') {
             $fields['value'] = null;
         }
-        return KeyValueRequest::updateModel(Product::class, $product_id, $fields);
+        return KeyValueRequest::updateModelWithResponse(Product::class, $product_id, $fields, function (Product $product) {
+            $product->setHidden(['store']);
+            return response()->json($product, 200);
+        });
     }
 
     /**

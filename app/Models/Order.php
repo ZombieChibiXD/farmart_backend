@@ -19,6 +19,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'store_id',
         'total',
         'status',
         'dropoff_location',
@@ -36,6 +37,7 @@ class Order extends Model
 
     protected $with = [
         'orderDetails',
+        'store',
     ];
 
 
@@ -64,6 +66,11 @@ class Order extends Model
             self::STATUS_CANCELED => 'Canceled',
         ];
         return $status[$this->status];
+    }
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
     }
 
 

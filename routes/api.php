@@ -6,6 +6,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CsrfController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TesterController;
@@ -173,6 +174,23 @@ Route::group([
     Route::post('/checkout', [CartController::class, 'checkout']);
     // Delete cart item
     Route::delete('/{item_id}', [CartController::class, 'destroy']);
+});
+
+
+
+// Route prefix 'cart'
+Route::group([
+    'prefix' => 'orders',
+    'middleware' => ['auth:sanctum']
+], function () {
+    // Get all cart items
+    Route::get('/', [OrderController::class, 'index']);
+    // Add item to cart
+    // Route::post('/', [OrderController::class, 'store']);
+    // // Update cart item
+    // Route::post('/checkout', [OrderController::class, 'checkout']);
+    // // Delete cart item
+    // Route::delete('/{item_id}', [OrderController::class, 'destroy']);
 });
 
 

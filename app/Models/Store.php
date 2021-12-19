@@ -28,6 +28,14 @@ class Store extends Model
         'telephone',
     ];
 
+    protected $hidden = [
+        'user_id',
+        'slug',
+        'created_at',
+        'updated_at',
+        'image',
+    ];
+
 
     /**
      * Appended attributes.
@@ -59,6 +67,9 @@ class Store extends Model
         return $this->hasMany(Chatroom::class);
     }
     public function orders(){
+        return $this->hasMany(Order::class);
+    }
+    public function orderItems(){
         return $this->hasManyThrough(OrderDetail::class, Product::class);
     }
     public function reviews(){
@@ -72,12 +83,12 @@ class Store extends Model
 
     public function getTotalOrdersAttribute()
     {
-        return $this->orders()->count();
+        return $this->orderItems()->count();
     }
 
     public function getTotalSalesAttribute()
     {
-        return $this->orders()->sum('subtotal');
+        return $this->orderItems()->sum('subtotal');
     }
 
     public function getTotalReviewsAttribute()

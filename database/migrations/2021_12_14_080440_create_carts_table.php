@@ -19,7 +19,6 @@ class CreateCartsTable extends Migration
             $table->foreignId('product_id')->constrained('products');
             $table->decimal('price_discounted', 10, 2)->nullable();
             $table->bigInteger('amount');
-            $table->boolean('is_checked_out')->default(false);
             $table->timestamps();
         });
     }

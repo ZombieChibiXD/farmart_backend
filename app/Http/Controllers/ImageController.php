@@ -80,6 +80,8 @@ class ImageController extends Controller
             $imagesStorages []= $imagesStorage;
             $product->images()->attach($imagesStorage->id);
         }
+        // Hide store from product
+        $product->setHidden(['store']);
         return $product;
     }
 
@@ -93,6 +95,7 @@ class ImageController extends Controller
             unset($product->product_images);
             Image::destroy($image_id);
         }
+        $product->setHidden(['store']);
         return $product;
     }
 }
