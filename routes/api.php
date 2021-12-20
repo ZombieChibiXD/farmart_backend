@@ -91,7 +91,7 @@ Route::group([
     'prefix' => 'store/{store_id}',
     'middleware' => ['auth:sanctum', 'store_manage'],
 ], function () {
-    Route::get('/products', [ProductController::class, 'ownned_products']);
+    Route::get('/products', [ProductController::class, 'owned_products']);
     // Create a new product
     Route::post('/products', [ProductController::class, 'store']);
 
@@ -177,8 +177,9 @@ Route::group([
 });
 
 
+#region Order
 
-// Route prefix 'cart'
+// Route prefix 'orders'
 Route::group([
     'prefix' => 'orders',
     'middleware' => ['auth:sanctum']
@@ -186,21 +187,45 @@ Route::group([
     // Get all cart items
     Route::get('/', [OrderController::class, 'index']);
     // Add item to cart
-    // Route::post('/', [OrderController::class, 'store']);
-    // // Update cart item
-    // Route::post('/checkout', [OrderController::class, 'checkout']);
-    // // Delete cart item
-    // Route::delete('/{item_id}', [OrderController::class, 'destroy']);
+    Route::post('/', [OrderController::class, 'store']);
+
+    // Get all cart items
+    Route::get('/store/{store_id}', [OrderController::class, 'store_list'])->middleware('store_manage');
+
+    // Route middleware for admin
+    Route::group([
+        'middleware' => ['role:' . Role::ADMINISTRATOR],
+    ], function () {
+        Route::get('/admin', [OrderController::class, 'admin_list']);
+    });
 });
 
 
+Route::group([
+    'prefix' => 'order',
+    'middleware' => ['auth:sanctum']
+], function () {
+    // Get all cart items
+    Route::get('/{order_id}', [OrderController::class, 'show']);
+    Route::post('/cancel', [OrderController::class, 'cancel']);
+
+    Route::group([
+        'middleware' => ['role:' . Role::ADMINISTRATOR]
+    ], function (){
+        Route::post('/pay', [OrderController::class, 'pay']);
+        Route::post('/deliver', [OrderController::class, 'deliver']);
+    });
+
+    Route::group([
+        'middleware' => ['role:' . Role::SELLER]
+    ], function (){
+        Route::post('/ship/seller', [OrderController::class, 'ship']);
+        Route::post('/cancel/seller', [OrderController::class, 'cancel_seller']);
+    });
+});
 
 
-
-
-
-
-
+#endregion Order
 
 
 // Route prefix 'admin'

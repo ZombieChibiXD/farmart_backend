@@ -56,22 +56,8 @@ class Product extends Model
      * @var array
      */
     protected $appends  = [
-        'product_images','location', 'type', 'like', 'stars', 'reviews_count',
-        'sold'
+        'product_images','location', 'type', 'like', 'stars', 'reviews_count'
     ];
-
-    /**
-     * Get sold products through order_details attribute which it's parent  order relationship is completed
-     */
-    public function getSoldAttribute()
-    {
-        // Count all order details that has this product and the order is completed
-        $order_details = $this->order_details()->whereHas('order', function ($query) {
-            $query->where('status', Order::STATUS_DELIVERED);
-        })->get();
-        // Count all quantity of order details
-        return $order_details->sum('quantity');
-    }
 
 
     /**

@@ -8,14 +8,25 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
+    const STATUS_CANCELLED = 0;
     const STATUS_PENDING_PAYMENT = 1;
     const STATUS_PAID = 2;
     const STATUS_SHIPPED = 3;
     const STATUS_DELIVERED = 4;
-    const STATUS_CANCELED = 5;
 
     const NO_COURIER = 'No courier';
 
+
+    const FIELDS = [
+        'user_id' => 'required|exists:users,id',
+        'store_id' => 'required|exists:stores,id',
+        'total' => 'required|numeric',
+        'status' => 'required|integer',
+        'dropoff_location' => 'required|string',
+        'transaction_code' => 'required|string',
+        'courier_code' => 'required|string',
+
+    ];
 
     protected $fillable = [
         'user_id',
@@ -24,7 +35,7 @@ class Order extends Model
         'status',
         'dropoff_location',
         'transaction_code',
-        'courrier_code',
+        'courier_code',
     ];
     protected $appends = [
         'status_text',
@@ -32,7 +43,7 @@ class Order extends Model
 
     protected $attributes = [
         'status' => self::STATUS_PENDING_PAYMENT,
-        'courrier_code' => self::NO_COURIER,
+        'courier_code' => self::NO_COURIER,
     ];
 
     protected $with = [
@@ -63,9 +74,19 @@ class Order extends Model
             self::STATUS_PAID => 'Paid',
             self::STATUS_SHIPPED => 'Shipped',
             self::STATUS_DELIVERED => 'Delivered',
-            self::STATUS_CANCELED => 'Canceled',
+            self::STATUS_CANCELLED => 'Cancelled',
         ];
         return $status[$this->status];
+    }
+
+    public static function statusText(){
+        return [
+            self::STATUS_PENDING_PAYMENT => 'Pending Payment',
+            self::STATUS_PAID => 'Paid',
+            self::STATUS_SHIPPED => 'Shipped',
+            self::STATUS_DELIVERED => 'Delivered',
+            self::STATUS_CANCELLED => 'Cancelled',
+        ];
     }
 
     public function store()
