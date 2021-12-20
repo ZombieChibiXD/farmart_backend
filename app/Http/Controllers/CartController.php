@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -14,8 +15,25 @@ class CartController extends Controller
     public function index()
     {
         $cart = request()->user()->cart;
+
+        // Create an array that groups cart items based on their storeIds
+        $cartItems = $cart->groupBy('product.store_id');
+
+        // setHidden store in cartItems
+        $cartItems->each(function ($group, $key) {
+            // For each item in group
+            foreach ($group as $value) {
+                $value->product->setHidden(['store', 'images']);
+            }
+        });
+
+
+
+        // Get stores from cartItems keys
+        $stores = Store::whereIn('id', $cartItems->keys())->get();
+
         // Return as JSON response
-        return response()->json($cart);
+        return response()->json(['stores'=> $stores, 'cart'=>$cartItems]);
     }
 
     /**
