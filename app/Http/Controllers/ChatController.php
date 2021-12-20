@@ -23,7 +23,7 @@ class ChatController extends Controller
     /**
      * Display a listing of the chatrooms.
      *
-     * Used to find recepients for chat
+     * Used to find recipients for chat
      *
      * @return \Illuminate\Http\Response
      */
@@ -182,7 +182,7 @@ class ChatController extends Controller
     /**
      * Display the specified chatroom all messages. Becomes a participant of chatroom.
      *
-     * Used when a user clicked chat recepient
+     * Used when a user clicked chat recipient
      *
      * @param  Request  $request
      * @return \Illuminate\Http\Response
@@ -196,7 +196,7 @@ class ChatController extends Controller
             return response(['message' => 'You are restricted'], 403);
         }
         // Validate chatroom_id as chatroom and as as string
-        // Both request are requried
+        // Both request are required
         $this->validate($request, [
             'chatroom_id' => 'required|exists:chatrooms,id',
             'as' => 'string|required|in:member,seller,admin',
@@ -232,9 +232,9 @@ class ChatController extends Controller
                 if ($chatroom->user_id && $chatroom->store_id) {
                     return response(['message' => 'This chatroom is not an admin chatroom'], 400);
                 }
-                // If user is not administrator return you don't have the priviledge
+                // If user is not administrator return you don't have the privilege
                 if (($user->role & Role::ADMINISTRATOR) != Role::ADMINISTRATOR) {
-                    return response(['message' => 'You don\'t have the priviledge'], 400);
+                    return response(['message' => 'You don\'t have the privilege'], 400);
                 }
                 $participant = $chatroom->findOrCreateAdminParticipant($user->id);
                 break;
@@ -262,7 +262,7 @@ class ChatController extends Controller
     public function messages(Request $request)
     {
         // Validate request chatroom_id, created_at and as as string
-        // Both request are requried
+        // Both request are required
         $this->validate($request, [
             'chatroom_id' => 'required|exists:chatrooms,id',
             'created_at' => 'date',
@@ -286,9 +286,9 @@ class ChatController extends Controller
                 $participant = $chatroom->participants()->where('user_id', request()->user()->id)->where('role_flag', Role::SELLER)->first();
                 break;
             case 'admin':
-                // If user is not administrator return you don't have the priviledge
+                // If user is not administrator return you don't have the privilege
                 if ((request()->user()->role & Role::ADMINISTRATOR) != Role::ADMINISTRATOR) {
-                    return response(['message' => 'You don\'t have the priviledge'], 400);
+                    return response(['message' => 'You don\'t have the privilege'], 400);
                 }
                 $participant = $chatroom->participants()->where('user_id', request()->user()->id)->where('role_flag', Role::ADMINISTRATOR)->first();
                 break;
