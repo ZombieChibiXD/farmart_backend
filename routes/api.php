@@ -39,6 +39,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) { return $request->user(); });
     Route::post('/user/photo', [ImageController::class, 'user_profile']);
+    Route::post('/user/verification', [ImageController::class, 'verify_profile']);
     Route::middleware('role:' . Role::RESTRICTED)->get('/restricted', function () {
         return ['message' => 'You are restricted!'];
     });
@@ -51,7 +52,7 @@ Route::get('/store/{id}', [StoreController::class, 'show']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     // List stores that user can handle
-    Route::get('/stores', [StoreController::class, 'index']);
+    Route::get('/stores', [StoreController::class, 'managed']);
     // Creates a new store for user
     Route::post('/stores', [StoreController::class, 'store']);
 
@@ -161,6 +162,8 @@ Route::group([
 });
 #endregion Chat
 
+
+#region Cart
 // Route prefix 'cart'
 Route::group([
     'prefix' => 'cart',
@@ -175,7 +178,7 @@ Route::group([
     // Delete cart item
     Route::delete('/{item_id}', [CartController::class, 'destroy']);
 });
-
+#endregion Cart
 
 #region Order
 
@@ -228,6 +231,7 @@ Route::group([
 #endregion Order
 
 
+#region Admin
 // Route prefix 'admin'
 Route::group([
     'prefix' => 'admin',
@@ -235,4 +239,12 @@ Route::group([
 ], function () {
     // Get all users
     Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users/verification', [UserController::class, 'verify']);
+    // Get all stores
+    Route::get('/stores', [StoreController::class, 'index']);
+
+
+
 });
+
+#endregion Admin

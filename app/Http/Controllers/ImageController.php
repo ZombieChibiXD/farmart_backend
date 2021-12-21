@@ -49,6 +49,25 @@ class ImageController extends Controller
         $user->save();
         return $user;
     }
+    public function verify_profile(Request $request)
+    {
+        $user = $request->user();
+
+        $data = self::imageValidation($request,'images/user/verification')[0];
+        $imageStorage = Image::create($data);
+        // Create or update user verification image
+        if ($user->verification) {
+            $user->verification->image_id = $imageStorage->id;
+            $user->verification->save();
+        } else {
+            $user->verification()->create([
+                'image_id' => $imageStorage->id
+            ]);
+        }
+        $user->save();
+        $user->load('verification');
+        return $user;
+    }
 
     public function store_profile(Request $request)
     {

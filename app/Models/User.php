@@ -46,13 +46,23 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected $with = ['verification'];
+
     /**
      * Appended attributes.
      *
      * @var array
      */
-    protected $appends  = ['profile_image','roles'];
+    protected $appends  = ['profile_image','roles', 'verified'];
 
+    /**
+     * Get verified attribute.
+     *
+     */
+    public function getVerifiedAttribute()
+    {
+        return $this->verification->verified ?? false;
+    }
 
     /**
      * Check if user manages a store by ID.
@@ -143,6 +153,11 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function verification()
+    {
+        return $this->hasOne(UserVerification::class);
     }
 
 }
