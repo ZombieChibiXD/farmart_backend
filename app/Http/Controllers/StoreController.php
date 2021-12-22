@@ -16,12 +16,39 @@ class StoreController extends Controller
      */
     public function index()
     {
+        $search = request()->search ?? '';
+        $stores = Store::where(function ($query) use ($search) {
+            $query->where('name', 'like', '%' . $search . '%')
+                ->orWhere('storename', 'like', '%' . $search . '%')
+                ->orWhere('description', 'like', '%' . $search . '%')
+                ->orWhere('url', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%');
+        })
+            ->when(request()->has('selected_date'), function ($query) {
+                $query->whereBetween('created_at', [
+                    request()->selected_date . ' 00:00:00',
+                    request()->selected_date . ' 23:59:59'
+                ]);
+            })
+            ->get();
+        return response()->json($stores);
+    }
+
+    /**
+     * Display a listing of the store user manage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function managed()
+    {
         $user = request()->user();
         $response = [
             'stores' => $user->stores
         ];
         return response($response, 201);
     }
+
+
 
     /**
      * Store a newly created resource in storage.
@@ -53,9 +80,9 @@ class StoreController extends Controller
             'location' => $fields['location'],
             'address' => $fields['address'],
             'coordinate' => $fields['coordinate'],
-            'email' => $fields['email']??'',
-            'url' => $fields['url']??'',
-            'telephone' => $fields['telephone']??'',
+            'email' => $fields['email'] ?? '',
+            'url' => $fields['url'] ?? '',
+            'telephone' => $fields['telephone'] ?? '',
         ]);
         $store->handlers()->attach($user->id);
         return response($store, 201);

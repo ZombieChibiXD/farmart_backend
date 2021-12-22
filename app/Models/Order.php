@@ -14,7 +14,7 @@ class Order extends Model
     const STATUS_SHIPPED = 3;
     const STATUS_DELIVERED = 4;
 
-    const NO_COURIER = 'No courier';
+    const NO_COURIER = 'N/A';
 
 
     const FIELDS = [

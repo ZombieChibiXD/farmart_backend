@@ -244,6 +244,11 @@ class OrderController extends Controller
             $detail->product->sold += $detail->amount;
             $detail->product->save();
         });
+        // Create a new notification with text Hello world from order user
+        $order->user->notifications->create([
+            'type' => 'Order delivery',
+            'data' => 'Your order '.$order->transaction_code .' been delivered.'
+        ]);
 
         // Return as JSON response
         return response()->json(['message' => 'Order delivered.']);

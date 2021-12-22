@@ -202,7 +202,7 @@ class ChatController extends Controller
             'as' => 'string|required|in:member,seller,admin',
         ]);
         $chatroom = Chatroom::cast(Chatroom::find($request->chatroom_id));
-
+        $details = null;
         $participant = null;
         switch ($request->as) {
             case 'member':
@@ -215,6 +215,7 @@ class ChatController extends Controller
                     return response(['message' => 'You are not part of this chatroom'], 400);
                 }
                 $participant = $chatroom->findOrCreateMemberParticipant($user->id);
+                $details = $chatroom->getDetailsAsMember();
                 break;
             case 'seller':
                 // If chatroom is not a store (by not having store_id) return error
@@ -226,6 +227,7 @@ class ChatController extends Controller
                     return response(['message' => 'You don\'t have access to this store'], 400);
                 }
                 $participant = $chatroom->findOrCreateSellerParticipant($user->id, $chatroom->store_id);
+                $details = $chatroom->getDetailsAsStore();
                 break;
             case 'admin':
                 // If chatroom have both user_id and store_id return error
@@ -237,10 +239,12 @@ class ChatController extends Controller
                     return response(['message' => 'You don\'t have the privilege'], 400);
                 }
                 $participant = $chatroom->findOrCreateAdminParticipant($user->id);
+                $details = $chatroom->getDetailsAsAdmin();
                 break;
         }
         // Load participant user
         $participant->load('user');
+        $participants = $chatroom->participants;
         // Return as json
         return response()->json([
             'chatroom' => $chatroom,

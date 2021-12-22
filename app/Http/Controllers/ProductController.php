@@ -44,22 +44,38 @@ class ProductController extends Controller
 
         // Filter product by store location if store location is simmilar to request location array
         // if request location is not empty
-        if (request()->has('location') && !empty(request()->location)) {
-            $products = $products->filter(function ($product) {
-                return in_array($product->store->location, request()->location);
-            });
+        $locations = [];
+        if (request()->has('location')) {
+            // if request location is an object, directly append to locations array
+            if (is_array(request()->location)) {
+                // if request location is an array, append each object to locations array
+                foreach (request()->location as $location) {
+                    $locations[] = $location;
+                }
+            } else {
+                $locations[] = request()->location;
+            }
+        }
+        $product_location = [];
+        if (!empty($locations)) {
+            foreach ($products as $product) {
+                if (in_array($product->location, $locations)) {
+                    $product_location[] = $product;
+                }
+            }
+            $products = $product_location;
         }
 
         // Filter products by category if request category array exist
-        if (request('types')) {
-            $products = $products->filter(function ($product) {
-                foreach ($product->type as $value) {
-                    if (in_array($value, request('types'))) {
-                        return true;
-                    }
-                }
-            });
-        }
+        // if (request('types')) {
+        //     $products = $products->filter(function ($product) {
+        //         foreach ($product->type as $value) {
+        //             if (in_array($value, request('types'))) {
+        //                 return true;
+        //             }
+        //         }
+        //     });
+        // }
 
         // return products as json
         return response()->json($products);
@@ -72,7 +88,7 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function ownned_products(Request $request)
+    public function owned_products(Request $request)
     {
         $store_id = $request->route('store_id');
         // Get all products where store_id is equal to the store_id in the route only
@@ -140,6 +156,8 @@ class ProductController extends Controller
         if (auth()->check()) {
             $product['like'] = request()->user()->likes_products()->where('product_id', $id)->exists();
         }
+        // Show image from product
+        $product->with('images');
         return response($product);
     }
     /**
@@ -233,11 +251,11 @@ class ProductController extends Controller
             'review' => 'required|string'
         ]);
         $product = Product::find($request->product_id);
-        $product->reviews()->create([
-            'user_id' => auth()->id(),
-            'stars' => $request->stars,
-            'review' => $request->review
-        ]);
+        // create or update review
+        $review = $product->reviews()->updateOrCreate(
+            ['user_id' => auth()->id()],
+            ['stars' => $request->stars, 'review' => $request->review]
+        );
         return response([
             'message' => 'Review have been added!'
         ], 201);

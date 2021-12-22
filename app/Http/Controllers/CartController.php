@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Store;
 use Illuminate\Http\Request;
@@ -34,6 +35,27 @@ class CartController extends Controller
 
         // Return as JSON response
         return response()->json(['stores'=> $stores, 'cart'=>$cartItems]);
+    }
+
+    public function negotiate(Request $request){
+        // Get fields and validate user_id, product_id, amount, price_discounted
+        $fields = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'product_id' => 'required|exists:products,id',
+            'amount' => 'required|integer|min:1',
+            'price_discounted' => 'numeric|min:0'
+        ]);
+
+        // delete cart item with user_id, product_id
+        Cart::where('user_id', $fields['user_id'])
+            ->where('product_id', $fields['product_id'])
+            ->delete();
+
+        // Create new cart item
+        $cart = Cart::create($fields);
+
+        // Return as JSON response
+        return response()->json($cart);
     }
 
     /**

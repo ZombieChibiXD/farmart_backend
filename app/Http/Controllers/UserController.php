@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\KeyValueRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -61,6 +62,15 @@ class UserController extends Controller
 
     }
 
+    public function notifications()
+    {
+        // Get all notifications for the user
+        $notifications = auth()->user()->notifications;
+
+        // Return notifications
+        return response()->json($notifications);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -105,11 +115,20 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
-    }
+        // Get user by id
+        $user = User::find(auth()->user()->id);
+        $requirement = [
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+        ];
 
+        $fields = KeyValueRequest::requirements($request, $requirement);
+        return KeyValueRequest::updateModelWithResponse(User::class, $user->id, $fields, function (User $store) {
+            return response()->json($store, 200);
+        });
+    }
     /**
      * Remove the specified resource from storage.
      *

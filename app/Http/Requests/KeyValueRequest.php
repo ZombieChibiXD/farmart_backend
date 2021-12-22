@@ -18,7 +18,7 @@ class KeyValueRequest
      */
     public static function requirements(Request $request, array $requirement)
     {
-        $name = $request->validate([
+        $name = request()->validate([
             'name' => 'required|string|in:' . implode(",",array_keys($requirement)),
             'value' => ''
         ]);
@@ -42,12 +42,12 @@ class KeyValueRequest
 
     public static function updateModelWithResponse(string $classStr, int $id, array $fields, Closure $callback){
         $class = self::updateModel($classStr, $id, $fields);
-        if ($class == self::ITEM_NOT_FOUND) {
+        if ($class === self::ITEM_NOT_FOUND) {
             return response([
                 'message' => 'Item not found!'
             ], 401);
         }
-        if ($class == self::ITEM_NOT_UPDATED) {
+        if ($class === self::ITEM_NOT_UPDATED) {
             return response([
                 'message' => 'An unknown error has occured!!'
             ], 501);

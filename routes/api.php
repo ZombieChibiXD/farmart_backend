@@ -37,7 +37,9 @@ Route::post('/check-username-or-email-exists',       [AuthController::class, 'ch
 #region User General
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/logout', [AuthController::class, 'logout']);
+    Route::get('/notifications', [UserController::class, 'notifications']);
     Route::get('/user', function (Request $request) { return $request->user(); });
+    Route::put('/user', [UserController::class, 'update']);
     Route::post('/user/photo', [ImageController::class, 'user_profile']);
     Route::post('/user/verification', [ImageController::class, 'verify_profile']);
     Route::middleware('role:' . Role::RESTRICTED)->get('/restricted', function () {
@@ -173,6 +175,7 @@ Route::group([
     Route::get('/', [CartController::class, 'index']);
     // Add item to cart
     Route::post('/', [CartController::class, 'store']);
+    Route::post('/negotiate', [CartController::class, 'negotiate']);
     // Update cart item
     Route::post('/checkout', [CartController::class, 'checkout']);
     // Delete cart item
