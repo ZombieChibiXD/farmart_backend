@@ -7,7 +7,9 @@ use App\Http\Controllers\CsrfController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PromoController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TesterController;
 use App\Http\Controllers\UserController;
@@ -64,6 +66,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     ], function () {
         Route::put('/', [StoreController::class, 'update']);
         Route::post('/photo', [ImageController::class, 'store_profile']);
+        Route::post('/toggle_visibility', [StoreController::class, 'toggle_visibility']);
     });
 });
 #endregion
@@ -245,9 +248,32 @@ Route::group([
     Route::post('/users/verification', [UserController::class, 'verify']);
     // Get all stores
     Route::get('/stores', [StoreController::class, 'index']);
+    Route::post('/store/ban', [StoreController::class, 'toggle_banned']);
+
 
 
 
 });
 
 #endregion Admin
+
+// Promo api routes
+Route::group([
+    'prefix' => 'promo',
+    'middleware' => ['auth:sanctum']
+], function () {
+    Route::get('/', [PromoController::class, 'index']);
+    Route::post('/', [PromoController::class, 'store']);
+    Route::get('/{promo_id}', [PromoController::class, 'show']);
+    Route::put('/{promo_id}', [PromoController::class, 'update']);
+    Route::delete('/{promo_id}', [PromoController::class, 'destroy']);
+});
+
+// Overview Route for seller and admin leading to different views
+Route::group([
+    'prefix' => 'overview',
+    'middleware' => ['auth:sanctum']
+], function(){
+    Route::get('/admin', [OverviewController::class, 'admin'])->middleware('role:' . Role::ADMINISTRATOR);
+    Route::get('/store/{store_id}', [OverviewController::class, 'store'])->middleware('store_manage');
+});

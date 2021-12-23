@@ -48,6 +48,38 @@ class StoreController extends Controller
         return response($response, 201);
     }
 
+    /**
+     * Display a listing of the store user manage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function toggle_banned(Request $request)
+    {
+        $fields = $request->validate([
+            'store_id' => 'required|exists:stores,id'
+        ]);
+
+        $store = Store::find($fields['store_id']);
+        $store->visibility = $store->visibility == 'banned' ? 'public' : 'banned';
+        $store->save();
+
+        return response()->json($store);
+    }
+
+    /**
+     * Display a listing of the store user manage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function toggle_visibility(Request $request)
+    {
+        $store = Store::find($request->route('store_id'));
+        $store->visibility = $store->visibility == 'public' ? 'hidden' : 'public';
+        $store->save();
+
+        return response()->json($store);
+    }
+
 
 
     /**
