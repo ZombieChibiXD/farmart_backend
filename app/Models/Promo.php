@@ -10,6 +10,6 @@ class Promo extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'type', 'start_date', 'end_date', 'seasons', 'value', 'status', 'code'
+        'name', 'type', 'start_date', 'end_date', 'seasons', 'value', 'visible', 'usable', 'code'
     ];
 }

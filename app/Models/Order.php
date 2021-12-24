@@ -36,6 +36,7 @@ class Order extends Model
         'dropoff_location',
         'transaction_code',
         'courier_code',
+        'promo_value',
     ];
     protected $appends = [
         'status_text',

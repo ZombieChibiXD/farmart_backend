@@ -265,7 +265,7 @@ Route::group([
     Route::get('/', [PromoController::class, 'index']);
     Route::post('/', [PromoController::class, 'store']);
     Route::get('/{promo_id}', [PromoController::class, 'show']);
-    Route::put('/{promo_id}', [PromoController::class, 'update']);
+    Route::post('/{promo_id}', [PromoController::class, 'update']);
     Route::delete('/{promo_id}', [PromoController::class, 'destroy']);
 });
 

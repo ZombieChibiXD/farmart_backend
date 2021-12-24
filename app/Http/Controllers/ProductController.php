@@ -21,11 +21,16 @@ class ProductController extends Controller
         // filter by price from request if it exist and is a number
         // filter by price to request if exist and is a number
         // order by order request if it exist
+        // where the store owning it visibility is public
         // paginate per page 20, and paging by page request if it exist
+
 
 
         $products = Product::where('labeled', '!=', 'unlisted')
             ->orWhereNull('labeled')
+            ->whereHas('store', function ($query) {
+                return $query->where('visibility', 'public');
+            })
             ->where(function ($query) {
                 $query->where('fullname', 'like', '%' . request()->search . '%')
                     ->orWhere('shortname', 'like', '%' . request()->search . '%');

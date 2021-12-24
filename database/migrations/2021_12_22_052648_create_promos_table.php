@@ -21,8 +21,9 @@ class CreatePromosTable extends Migration
             $table->date('end_date')->nullable();
             $table->string('seasons')->nullable();
             $table->string('value');
-            $table->string('status');
-            $table->string('code')->nullable();
+            $table->boolean('visible')->default(false);
+            $table->boolean('usable')->default(false);
+            $table->string('code')->nullable()->unique();
             $table->timestamps();
         });
     }

@@ -9,11 +9,23 @@ class PromoController extends Controller
 {
     public function index(){
         $promos = Promo::all();
+
         return response()->json($promos);
     }
 
     public function store(Request $request){
-        $promo = Promo::create($request->all());
+        $fields = $request->validate([
+            'name' => 'required',
+            'type' => 'required',
+            'start_date' => 'nullable',
+            'end_date' => 'nullable',
+            'seasons' => 'nullable',
+            'value' => 'required',
+            'visible' => 'boolean',
+            'usable' => 'boolean',
+            'code' => 'nullable'
+        ]);
+        $promo = Promo::create($fields);
         return response()->json($promo);
     }
 
@@ -24,7 +36,22 @@ class PromoController extends Controller
 
     public function update(Request $request, $id){
         $promo = Promo::find($id);
-        $promo->update($request->all());
+        // Validate request
+        // 'name', 'type', 'start_date', 'end_date', 'seasons', 'value', 'visible', 'usable', 'code'
+        $fields = $request->validate([
+            'name' => 'required|string',
+            'type' => 'required|string',
+            'start_date' => 'date',
+            'end_date' => 'date',
+            'seasons' => 'required|string',
+            'value' => 'required|string',
+            // 'visible' => 'boolean',
+            // 'usable' => 'boolean',
+            'code' => 'string|unique:promos,code'
+        ]);
+        // $fields["visible"] = $fields["visible"] ?? false;
+        // $fields["usable"] = $fields["usable"] ?? false;
+        $promo->update($fields);
         return response()->json($promo);
     }
 

@@ -23,6 +23,7 @@ class Product extends Model
         'labeled' => 'string|nullable',
         'description' => 'required|string',
         'stock' => 'required|numeric',
+        'season' => 'string|nullable',
         'sold' => 'numeric',
         'likes' => 'numeric',
     ];
